@@ -32,6 +32,9 @@ const HomePage = () => {
                 <Link to="/orders" data-testid="orders-link">
                   <Button variant="ghost" data-testid="orders-nav-btn">My Orders</Button>
                 </Link>
+                <Link to="/profile" data-testid="profile-link">
+                  <Button className="btn-primary" data-testid="profile-nav-btn">Profile</Button>
+                </Link>
               </>
             ) : (
               <Link to="/auth" data-testid="auth-link">
