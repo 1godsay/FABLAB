@@ -55,11 +55,11 @@ const HomePage = () => {
               <span className="text-xs uppercase tracking-widest text-neutral-500 font-medium">PRECISION ENGINEERING</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight">
-              3D Printing <br />
+              Premium 3D Designs <br />
               <span className="text-[#FF4D00]">Marketplace</span>
             </h1>
             <p className="text-lg text-neutral-600 leading-relaxed">
-              Connect with FabLabs and designers. Upload your 3D models, get instant pricing, and manufacture on demand.
+              Browse and buy exclusive 3D printable designs from top creators worldwide. Every design ready for instant download or professional printing services.
             </p>
             <div className="flex gap-4 pt-4">
               {user ? (
@@ -92,29 +92,29 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="text-center mb-16">
             <span className="text-xs uppercase tracking-widest text-neutral-500 font-medium">HOW IT WORKS</span>
-            <h2 className="text-4xl font-bold tracking-tight mt-4">Simple Process</h2>
+            <h2 className="text-4xl font-bold tracking-tight mt-4">Shop & Get Printed</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white border border-neutral-200 rounded-md p-8" data-testid="feature-upload">
               <div className="w-12 h-12 bg-[#FF4D00] rounded-md flex items-center justify-center mb-4">
                 <Box className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Upload STL</h3>
-              <p className="text-neutral-600">Upload your 3D model and get instant volume-based pricing with our automated engine.</p>
+              <h3 className="text-xl font-bold mb-2">Browse Designs</h3>
+              <p className="text-neutral-600">Discover thousands of premium 3D designs from verified creators. Filter by category, material, and price.</p>
             </div>
             <div className="bg-white border border-neutral-200 rounded-md p-8" data-testid="feature-order">
               <div className="w-12 h-12 bg-[#FF4D00] rounded-md flex items-center justify-center mb-4">
-                <Box className="w-6 h-6 text-white" />
+                <ShoppingBag className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Select Material</h3>
-              <p className="text-neutral-600">Choose from PLA, ABS, or Resin. Each material has different properties and pricing.</p>
+              <h3 className="text-xl font-bold mb-2">Purchase & Download</h3>
+              <p className="text-neutral-600">Buy designs instantly and download STL files, or order professional printing with automatic volume-based pricing.</p>
             </div>
             <div className="bg-white border border-neutral-200 rounded-md p-8" data-testid="feature-track">
               <div className="w-12 h-12 bg-[#FF4D00] rounded-md flex items-center justify-center mb-4">
                 <CheckCircle2 className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Track Order</h3>
-              <p className="text-neutral-600">Monitor your order from printing to post-processing, shipping, and delivery.</p>
+              <h3 className="text-xl font-bold mb-2">Get Delivered</h3>
+              <p className="text-neutral-600">Track your print orders from manufacturing to delivery. Professional quality guaranteed with every print.</p>
             </div>
           </div>
         </div>
@@ -123,8 +123,8 @@ const HomePage = () => {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="bg-neutral-900 rounded-md p-12 text-center text-white">
-            <h2 className="text-4xl font-bold mb-4">Ready to Start Manufacturing?</h2>
-            <p className="text-neutral-300 mb-8 text-lg">Join FABLAB today and access our network of 3D printing services.</p>
+            <h2 className="text-4xl font-bold mb-4">Join the Creator Economy</h2>
+            <p className="text-neutral-300 mb-8 text-lg">Start selling your 3D designs or discover exclusive prints from top creators.</p>
             <Link to="/auth" data-testid="cta-link">
               <Button className="btn-primary" data-testid="cta-btn">Create Account</Button>
             </Link>
