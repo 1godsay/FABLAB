@@ -88,20 +88,80 @@ const ProductDetailPage = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
-            <div className="aspect-square bg-neutral-100 rounded-md border border-neutral-200 overflow-hidden" data-testid="product-image-container">
+            <div className="aspect-square bg-neutral-100 rounded-md border border-neutral-200 overflow-hidden relative" data-testid="product-image-container">
               {product.images && product.images.length > 0 ? (
-                <img
-                  src={product.images[0]}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                  data-testid="product-main-image"
-                />
+                <>
+                  <img
+                    src={product.images[currentImageIndex]}
+                    alt={`${product.name} - Image ${currentImageIndex + 1}`}
+                    className="w-full h-full object-cover"
+                    data-testid="product-main-image"
+                  />
+                  {product.images.length > 1 && (
+                    <>
+                      <button
+                        onClick={prevImage}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all"
+                        data-testid="prev-image-btn"
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft className="w-6 h-6 text-neutral-800" />
+                      </button>
+                      <button
+                        onClick={nextImage}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all"
+                        data-testid="next-image-btn"
+                        aria-label="Next image"
+                      >
+                        <ChevronRight className="w-6 h-6 text-neutral-800" />
+                      </button>
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                        {product.images.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => selectImage(index)}
+                            className={`w-2 h-2 rounded-full transition-all ${
+                              index === currentImageIndex 
+                                ? 'bg-[#FF4D00] w-6' 
+                                : 'bg-white/70 hover:bg-white'
+                            }`}
+                            data-testid={`image-indicator-${index}`}
+                            aria-label={`View image ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-neutral-400" data-testid="no-image-placeholder">
                   <Box className="w-16 h-16" />
                 </div>
               )}
             </div>
+            
+            {product.images && product.images.length > 1 && (
+              <div className="mt-4 grid grid-cols-4 gap-2" data-testid="image-thumbnails">
+                {product.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => selectImage(index)}
+                    className={`aspect-square rounded-md border-2 overflow-hidden transition-all ${
+                      index === currentImageIndex 
+                        ? 'border-[#FF4D00] ring-2 ring-[#FF4D00]/20' 
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}
+                    data-testid={`thumbnail-${index}`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-6">
