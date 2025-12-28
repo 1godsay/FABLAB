@@ -14,11 +14,11 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="text-2xl font-bold tracking-tight" data-testid="logo-link">FABLAB</Link>
           <div className="flex items-center gap-4">
+            <Link to="/marketplace" data-testid="marketplace-link">
+              <Button variant="ghost" data-testid="marketplace-nav-btn">Marketplace</Button>
+            </Link>
             {user ? (
               <>
-                <Link to="/marketplace" data-testid="marketplace-link">
-                  <Button variant="ghost" data-testid="marketplace-nav-btn">Marketplace</Button>
-                </Link>
                 {user.role === 'seller' && (
                   <Link to="/seller/dashboard" data-testid="seller-dashboard-link">
                     <Button variant="ghost" data-testid="seller-dashboard-nav-btn">Dashboard</Button>
@@ -38,7 +38,7 @@ const HomePage = () => {
               </>
             ) : (
               <Link to="/auth" data-testid="auth-link">
-                <Button className="btn-primary" data-testid="get-started-btn">Get Started</Button>
+                <Button className="btn-primary" data-testid="get-started-btn">Login / Sign Up</Button>
               </Link>
             )}
           </div>
