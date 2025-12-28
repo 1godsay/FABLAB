@@ -1,0 +1,157 @@
+{
+  "identity": {
+    "name": "FABLAB",
+    "persona": "The Precision Engineer",
+    "vibe": "Industrial, Minimalist, High-Tech, Trustworthy",
+    "principles": [
+      "Fusion over Imitation: Mix Swiss Poster design with CAD software aesthetics.",
+      "Content is King: Every product listing is a technical spec sheet.",
+      "Zoom In: Focus on the layer lines and material texture.",
+      "Negative Space: White space is luxury; use it to frame the machinery.",
+      "Contrast: High contrast black/white for readability, Electric Orange for action."
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "headings": {
+        "family": "Manrope, sans-serif",
+        "weights": ["600", "800"],
+        "usage": "Main headers, section titles, hero text. Tight tracking."
+      },
+      "body": {
+        "family": "Inter, sans-serif",
+        "weights": ["400", "500"],
+        "usage": "Paragraphs, UI labels, general text."
+      },
+      "mono": {
+        "family": "JetBrains Mono, monospace",
+        "weights": ["400", "500"],
+        "usage": "Pricing, dimensions, technical specs, order IDs, code snippets."
+      }
+    },
+    "rules": [
+      "Headings > 32px must use tracking-tight.",
+      "Overlines/Labels must be Uppercase + tracking-widest + text-xs.",
+      "Never use Inter for Headings."
+    ]
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "name": "Electric Orange",
+        "hex": "#FF4D00",
+        "usage": "Primary CTAs, active states, 'hot' elements."
+      },
+      "secondary": {
+        "name": "Technical Blue",
+        "hex": "#0066FF",
+        "usage": "Links, info states, selection highlights."
+      },
+      "neutral": {
+        "white": "#FFFFFF",
+        "off_white": "#F8F9FA",
+        "light_grey": "#E5E5E5",
+        "mid_grey": "#A3A3A3",
+        "dark_grey": "#404040",
+        "black": "#0A0A0A"
+      },
+      "semantic": {
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "error": "#EF4444",
+        "info": "#3B82F6"
+      }
+    },
+    "theme_strategy": {
+      "mode": "light",
+      "background": "bg-white",
+      "foreground": "text-neutral-950",
+      "card_bg": "bg-neutral-50",
+      "border": "border-neutral-200"
+    }
+  },
+  "layout": {
+    "spacing": {
+      "base": "4px",
+      "scale": ["p-1", "p-2", "p-4", "p-6", "p-8", "p-12", "p-16", "p-24", "p-32"],
+      "rule": "Use 2x more spacing than typical SaaS. Containers with borders must have p-6 or p-8."
+    },
+    "grids": {
+      "marketing": {
+        "name": "The Tetris Grid",
+        "classes": "grid grid-cols-1 md:grid-cols-12 gap-8",
+        "usage": "Product listings, features, portfolio."
+      },
+      "dashboard": {
+        "name": "The Control Room",
+        "classes": "grid grid-cols-1 md:grid-cols-4 gap-4",
+        "usage": "Analytics, order management, file lists."
+      }
+    },
+    "container": {
+      "max_width": "max-w-7xl",
+      "padding": "px-4 md:px-8"
+    }
+  },
+  "components": {
+    "styling": {
+      "radius": "rounded-md",
+      "shadows": "shadow-none hover:shadow-md transition-shadow duration-200",
+      "borders": "border border-neutral-200",
+      "buttons": {
+        "primary": "bg-[#FF4D00] text-white hover:bg-[#E64500] rounded-md font-medium px-6 py-2 transition-all active:scale-95",
+        "secondary": "bg-white border border-neutral-200 text-neutral-900 hover:bg-neutral-50 rounded-md font-medium px-6 py-2 transition-all",
+        "ghost": "bg-transparent text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md px-4 py-2"
+      },
+      "inputs": {
+        "base": "bg-white border border-neutral-200 rounded-md px-3 py-2 focus:ring-2 focus:ring-[#FF4D00]/20 focus:border-[#FF4D00] outline-none transition-all"
+      },
+      "cards": {
+        "base": "bg-white border border-neutral-200 rounded-md p-6 hover:border-neutral-300 transition-colors"
+      }
+    },
+    "overrides": [
+      "Shadcn Button: Remove default ring offset.",
+      "Shadcn Card: Remove shadow, use border only.",
+      "Shadcn Input: Increase height to h-10 or h-12 for better touch targets."
+    ]
+  },
+  "assets": {
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px for elegance, 2px for UI controls."
+    },
+    "images": {
+      "hero": [
+        "https://images.unsplash.com/photo-1707286972301-a0b06f3f4870?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwxfHwzZCUyMHByaW50ZXIlMjBoaWdoJTIwdGVjaCUyMGNsb3NlJTIwdXB8ZW58MHx8fHwxNzY2ODk5ODQ5fDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1741517540162-451e3f5d6318?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHw0fHwzZCUyMHByaW50ZXIlMjBoaWdoJTIwdGVjaCUyMGNsb3NlJTIwdXB8ZW58MHx8fHwxNzY2ODk5ODQ5fDA&ixlib=rb-4.1.0&q=85"
+      ],
+      "products": [
+        "https://images.unsplash.com/photo-1682684123154-c21854fd90cf?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBpbmR1c3RyaWFsJTIwZGVzaWduJTIwcHJvZHVjdCUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NjY4OTk4NTB8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1642294490133-632a5b3bd36a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBpbmR1c3RyaWFsJTIwZGVzaWduJTIwcHJvZHVjdCUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NjY4OTk4NTB8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1711779187539-ef05cbaf5ff6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBpbmR1c3RyaWFsJTIwZGVzaWduJTIwcHJvZHVjdCUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NjY4OTk4NTB8MA&ixlib=rb-4.1.0&q=85"
+      ],
+      "placeholders": {
+        "user": "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+        "logo": "https://via.placeholder.com/150x50?text=FABLAB"
+      }
+    }
+  },
+  "tech_stack": {
+    "animation": "framer-motion",
+    "3d": "react-three-fiber, @react-three/drei",
+    "styling": "tailwindcss, shadcn/ui",
+    "icons": "lucide-react",
+    "toast": "sonner"
+  },
+  "universal_guidelines": [
+    "Do not use gradients for backgrounds; use subtle noise or grid patterns.",
+    "Avoid 'Inter' for headings; use 'Manrope'.",
+    "Use 'JetBrains Mono' for all pricing and technical data.",
+    "Buttons must have a 'click' animation (scale-95).",
+    "All interactive elements must have data-testid attributes.",
+    "Use 'sonner' for toasts.",
+    "Do not use generic centered layouts; use asymmetric grids.",
+    "Images must be high quality and relevant to 3D printing/manufacturing."
+  ]
+}
