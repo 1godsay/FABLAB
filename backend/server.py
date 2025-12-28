@@ -481,7 +481,7 @@ async def update_order_status(
     status: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
-    \"\"\"Update order status (admin only)\"\"\"
+    """Update order status (admin only)"""
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
