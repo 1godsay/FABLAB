@@ -30,7 +30,7 @@ class FABLABAPITester:
                 print(f"   Error: {error_msg}")
             self.failed_tests.append({"test": test_name, "error": error_msg})
 
-    def make_request(self, method, endpoint, data=None, files=None, headers=None, token=None):
+    def make_request(self, method, endpoint, data=None, files=None, headers=None, token=None, use_form_data=False):
         """Make HTTP request with error handling"""
         url = f"{self.base_url}/{endpoint}"
         
@@ -47,7 +47,7 @@ class FABLABAPITester:
                 if files:
                     # For multipart/form-data (file uploads)
                     response = requests.post(url, data=data, files=files, headers=request_headers)
-                elif isinstance(data, dict) and not any(isinstance(v, (list, dict)) for v in data.values()):
+                elif use_form_data:
                     # For simple form data
                     response = requests.post(url, data=data, headers=request_headers)
                 else:
@@ -58,7 +58,7 @@ class FABLABAPITester:
                 if files:
                     # For multipart/form-data (file uploads)
                     response = requests.put(url, data=data, files=files, headers=request_headers)
-                elif isinstance(data, dict) and not any(isinstance(v, (list, dict)) for v in data.values()):
+                elif use_form_data:
                     # For simple form data
                     response = requests.put(url, data=data, headers=request_headers)
                 else:
