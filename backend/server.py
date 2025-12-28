@@ -98,6 +98,8 @@ class Product(BaseModel):
     volume_cm3: float
     base_cost: float
     platform_margin: float
+    creator_royalty_percent: float = 10.0
+    creator_royalty: float
     final_price: float
     is_published: bool = False
     is_approved: bool = False
