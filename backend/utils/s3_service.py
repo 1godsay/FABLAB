@@ -21,7 +21,9 @@ class MockS3Service:
     
     def generate_download_url(self, file_key: str) -> Optional[str]:
         """Generate mock presigned URL for file download"""
-        return f"mock://download/{file_key}"
+        # Return a URL that points to our backend endpoint for serving files
+        backend_url = os.getenv('BACKEND_URL', 'http://localhost:8001')
+        return f"{backend_url}/api/files/mock/{file_key}"
     
     def upload_file(self, file_content: bytes, file_key: str, content_type: str = 'application/octet-stream') -> bool:
         """Upload file to local mock storage"""
