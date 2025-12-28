@@ -349,6 +349,35 @@ async def toggle_publish(product_id: str, current_user: dict = Depends(get_curre
     
     return {"message": f"Product {'published' if new_status else 'unpublished'}", "is_published": new_status}
 
+@api_router.delete("/products/{product_id}")
+async def delete_product(product_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete product (seller only)"""
+    product = await db.products.find_one({"id": product_id, "seller_id": current_user["id"]})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found or you don't have permission")
+    
+    # Delete associated files from S3/mock storage
+    try:
+        # Delete STL file
+        if product.get("stl_file_key"):
+            s3_service.delete_file(product["stl_file_key"])
+        
+        # Delete images
+        for image_url in product.get("images", []):
+            # Extract file key from URL
+            if "/api/files/mock/" in image_url:
+                file_key = image_url.split("/api/files/mock/")[1]
+                s3_service.delete_file(file_key)
+    except Exception as e:
+        logger.warning(f"Error deleting files for product {product_id}: {e}")
+    
+    # Delete product from database
+    await db.products.delete_one({"id": product_id})
+    
+    logger.info(f"Product {product_id} deleted by seller {current_user['id']}")
+    
+    return {"message": "Product deleted successfully"}
+
 @api_router.get("/products")
 async def list_products(
     category: Optional[str] = None,
