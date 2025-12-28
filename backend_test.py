@@ -75,10 +75,13 @@ class FABLABAPITester:
 
     def test_user_registration(self):
         """Test user registration for different roles"""
+        import time
+        timestamp = int(time.time())
+        
         test_users = [
-            {"email": "buyer@test.com", "password": "testpass123", "name": "Test Buyer", "role": "buyer"},
-            {"email": "seller@test.com", "password": "testpass123", "name": "Test Seller", "role": "seller"},
-            {"email": "admin@test.com", "password": "testpass123", "name": "Test Admin", "role": "admin"}
+            {"email": f"buyer{timestamp}@test.com", "password": "testpass123", "name": "Test Buyer", "role": "buyer"},
+            {"email": f"seller{timestamp}@test.com", "password": "testpass123", "name": "Test Seller", "role": "seller"},
+            {"email": f"admin{timestamp}@test.com", "password": "testpass123", "name": "Test Admin", "role": "admin"}
         ]
         
         for user_data in test_users:
