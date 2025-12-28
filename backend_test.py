@@ -254,7 +254,7 @@ endsolid test"""
         form_data = {'approved': 'true'}
         
         response = self.make_request('PUT', f'admin/products/{product_id}/approve', 
-                                   data=form_data, token=self.tokens['admin'])
+                                   data=form_data, token=self.tokens['admin'], use_form_data=True)
         
         if response and response.status_code == 200:
             self.log_result("Admin Approve Product", True, response.json())
