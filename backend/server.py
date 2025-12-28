@@ -112,7 +112,7 @@ class Transaction(BaseModel):
 
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
-    \"\"\"Verify JWT token and return user data\"\"\"
+    """Verify JWT token and return user data"""
     token = credentials.credentials
     payload = decode_token(token)
     
