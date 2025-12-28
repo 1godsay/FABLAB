@@ -431,7 +431,7 @@ async def verify_payment(
 
 @api_router.get("/orders/my-orders")
 async def get_my_orders(current_user: dict = Depends(get_current_user)):
-    \"\"\"Get buyer's orders\"\"\"
+    """Get buyer's orders"""
     orders = await db.orders.find({"buyer_id": current_user["id"]}, {"_id": 0}).to_list(100)
     return {"orders": orders}
 
