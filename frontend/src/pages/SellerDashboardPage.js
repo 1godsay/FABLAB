@@ -674,6 +674,23 @@ const SellerDashboardPage = () => {
               </div>
             </div>
             <div>
+              <Label htmlFor="creator-royalty">Creator Royalty (%)</Label>
+              <Input
+                id="creator-royalty"
+                data-testid="creator-royalty-input"
+                type="number"
+                min="0"
+                max="50"
+                step="0.5"
+                value={formData.creator_royalty_percent}
+                onChange={(e) => setFormData({ ...formData, creator_royalty_percent: parseFloat(e.target.value) || 0 })}
+                className="mt-1"
+              />
+              <p className="text-xs text-neutral-500 mt-1">
+                Your earnings per sale. Platform takes 20% fee. (Default: 10%, Max: 50%)
+              </p>
+            </div>
+            <div>
               <Label htmlFor="stl-file">STL File</Label>
               <Input
                 id="stl-file"
