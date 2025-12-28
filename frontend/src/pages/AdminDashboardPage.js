@@ -13,6 +13,10 @@ const AdminDashboardPage = () => {
   const [sellers, setSellers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [pendingProducts, setPendingProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -20,17 +24,19 @@ const AdminDashboardPage = () => {
 
   const fetchData = async () => {
     try {
-      const [usersRes, sellersRes, ordersRes, productsRes] = await Promise.all([
+      const [usersRes, sellersRes, ordersRes, productsRes, allProductsRes] = await Promise.all([
         api.get('/admin/users'),
         api.get('/admin/sellers'),
         api.get('/admin/orders'),
-        api.get('/admin/products/pending')
+        api.get('/admin/products/pending'),
+        api.get('/admin/products/all')
       ]);
       
       setUsers(usersRes.data.users);
       setSellers(sellersRes.data.sellers);
       setOrders(ordersRes.data.orders);
       setPendingProducts(productsRes.data.products);
+      setAllProducts(allProductsRes.data.products);
     } catch (error) {
       toast.error('Failed to load admin data');
     }
@@ -57,6 +63,28 @@ const AdminDashboardPage = () => {
       fetchData();
     } catch (error) {
       toast.error('Failed to update product');
+    }
+  };
+
+  const openDeleteDialog = (product) => {
+    setProductToDelete(product);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteProduct = async () => {
+    if (!productToDelete) return;
+
+    setDeleting(true);
+    try {
+      await api.delete(`/admin/products/${productToDelete.id}`);
+      toast.success('Product deleted successfully!');
+      setShowDeleteDialog(false);
+      setProductToDelete(null);
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete product');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -128,6 +156,7 @@ const AdminDashboardPage = () => {
           <TabsList>
             <TabsTrigger value="orders" data-testid="orders-tab">Orders</TabsTrigger>
             <TabsTrigger value="products" data-testid="products-tab">Product Approvals</TabsTrigger>
+            <TabsTrigger value="all-products" data-testid="all-products-tab">All Products</TabsTrigger>
             <TabsTrigger value="users" data-testid="users-tab">Users</TabsTrigger>
           </TabsList>
 
@@ -229,6 +258,71 @@ const AdminDashboardPage = () => {
                             >
                               <XCircle className="w-4 h-4 mr-2" /> Reject
                             </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-red-200 text-red-600 hover:bg-red-50"
+                              onClick={() => openDeleteDialog(product)}
+                              data-testid={`delete-btn-${product.id}`}
+                            >
+                              <XCircle className="w-4 h-4 mr-2" /> Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="all-products" data-testid="all-products-section">
+            <Card className="border-neutral-200">
+              <CardHeader>
+                <CardTitle>All Products</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {allProducts.length === 0 ? (
+                  <p className="text-center py-8 text-neutral-500" data-testid="no-products">No products yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {allProducts.map((product) => (
+                      <div key={product.id} className="border border-neutral-200 rounded-md p-4" data-testid={`all-product-${product.id}`}>
+                        <div className="flex gap-4">
+                          <div className="w-20 h-20 bg-neutral-100 rounded-md flex-shrink-0">
+                            {product.images && product.images.length > 0 ? (
+                              <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover rounded-md" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-neutral-400">No Image</div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold" data-testid="product-name">{product.name}</h4>
+                            <p className="text-sm text-neutral-600" data-testid="product-details">
+                              {product.category} • {product.material} • {product.volume_cm3} cm³
+                            </p>
+                            <p className="text-sm text-neutral-600 mt-2" data-testid="product-description">{product.description}</p>
+                            <div className="flex gap-2 mt-2">
+                              <span className={`px-2 py-1 text-xs rounded ${product.is_published ? 'bg-green-100 text-green-800' : 'bg-neutral-100'}`}>
+                                {product.is_published ? 'Published' : 'Draft'}
+                              </span>
+                              <span className={`px-2 py-1 text-xs rounded ${product.is_approved ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                {product.is_approved ? 'Approved' : 'Pending'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2 items-end">
+                            <div className="font-mono font-bold text-[#FF4D00]" data-testid="product-price">₹{product.final_price}</div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-red-200 text-red-600 hover:bg-red-50"
+                              onClick={() => openDeleteDialog(product)}
+                              data-testid={`delete-all-product-${product.id}`}
+                            >
+                              <XCircle className="w-4 h-4 mr-2" /> Delete
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -267,6 +361,44 @@ const AdminDashboardPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md" data-testid="admin-delete-dialog">
+          <DialogHeader>
+            <DialogTitle>Delete Product</DialogTitle>
+          </DialogHeader>
+          {productToDelete && (
+            <div className="space-y-4">
+              <p className="text-neutral-600">
+                Are you sure you want to delete <span className="font-bold">{productToDelete.name}</span>?
+              </p>
+              <p className="text-sm text-red-600">
+                This action cannot be undone. All product data, images, and STL files will be permanently deleted.
+              </p>
+              <div className="flex gap-4 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowDeleteDialog(false)}
+                  className="flex-1"
+                  data-testid="cancel-admin-delete-btn"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                  onClick={handleDeleteProduct}
+                  disabled={deleting}
+                  data-testid="confirm-admin-delete-btn"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Product'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
