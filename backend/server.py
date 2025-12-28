@@ -271,7 +271,7 @@ async def upload_product_image(
 
 @api_router.put("/products/{product_id}/publish")
 async def toggle_publish(product_id: str, current_user: dict = Depends(get_current_user)):
-    \"\"\"Publish/unpublish product\"\"\"
+    """Publish/unpublish product"""
     product = await db.products.find_one({"id": product_id, "seller_id": current_user["id"]})
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
