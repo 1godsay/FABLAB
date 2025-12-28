@@ -27,6 +27,9 @@ app = FastAPI(title="FABLAB API")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 import razorpay
 import uuid
 
@@ -62,9 +65,6 @@ if razorpay_key == 'rzp_test_dummy_key' or razorpay_secret == 'dummy_secret_for_
 else:
     logger.info("Using real Razorpay Client")
     razorpay_client = razorpay.Client(auth=(razorpay_key, razorpay_secret))
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class UserRegister(BaseModel):
