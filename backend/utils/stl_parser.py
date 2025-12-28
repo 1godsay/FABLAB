@@ -28,9 +28,9 @@ def calculate_stl_volume(file_content: bytes) -> float:
         logger.error(f"Error parsing STL file: {e}")
         raise ValueError(f"Failed to parse STL file: {str(e)}")
 
-def calculate_price(volume_cm3: float, material: str) -> dict:
+def calculate_price(volume_cm3: float, material: str, creator_royalty_percent: float = 10.0) -> dict:
     """
-    Calculate price based on volume and material
+    Calculate price based on volume, material, and creator royalty
     
     Material rates per cm³:
     - PLA: ₹5
@@ -39,8 +39,9 @@ def calculate_price(volume_cm3: float, material: str) -> dict:
     
     Formula:
     - Base cost = volume × material rate
-    - Platform margin = 20%
-    - Final price = base cost + margin
+    - Platform margin = 20% of base cost
+    - Creator royalty = configurable % of base cost (default 10%)
+    - Final price = base cost + platform margin + creator royalty
     """
     material_rates = {
         'PLA': 5,
@@ -50,14 +51,17 @@ def calculate_price(volume_cm3: float, material: str) -> dict:
     
     rate = material_rates.get(material, 5)
     base_cost = volume_cm3 * rate
-    margin = base_cost * 0.20
-    final_price = base_cost + margin
+    platform_margin = base_cost * 0.20
+    creator_royalty = base_cost * (creator_royalty_percent / 100)
+    final_price = base_cost + platform_margin + creator_royalty
     
     return {
         'volume_cm3': volume_cm3,
         'material': material,
         'rate_per_cm3': rate,
         'base_cost': round(base_cost, 2),
-        'platform_margin': round(margin, 2),
+        'platform_margin': round(platform_margin, 2),
+        'creator_royalty_percent': creator_royalty_percent,
+        'creator_royalty': round(creator_royalty, 2),
         'final_price': round(final_price, 2)
     }
