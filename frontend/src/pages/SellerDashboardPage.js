@@ -83,7 +83,7 @@ const SellerDashboardPage = () => {
       toast.success(`Product created! Price: ₹${response.data.pricing.final_price}`);
       
       setShowUploadDialog(false);
-      setFormData({ name: '', description: '', category: 'Mechanical', material: 'PLA' });
+      setFormData({ name: '', description: '', category: 'Mechanical', material: 'PLA', creator_royalty_percent: 10 });
       setStlFile(null);
       fetchProducts();
     } catch (error) {
