@@ -459,7 +459,7 @@ async def get_all_users(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/admin/sellers")
 async def get_all_sellers(current_user: dict = Depends(get_current_user)):
-    \"\"\"Get all sellers (admin only)\"\"\"
+    """Get all sellers (admin only)"""
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
