@@ -599,6 +599,30 @@ async def health_check():
     return {"status": "healthy", "service": "FABLAB API"}
 
 
+@api_router.get("/files/mock/{file_path:path}")
+async def serve_mock_file(file_path: str):
+    """Serve mock S3 files for testing"""
+    from fastapi.responses import Response
+    
+    if hasattr(s3_service, 'use_mock') and s3_service.use_mock:
+        file_content = s3_service.mock_service.get_file(file_path)
+        if file_content:
+            # Determine content type based on file extension
+            content_type = 'application/octet-stream'
+            if file_path.endswith('.jpg') or file_path.endswith('.jpeg'):
+                content_type = 'image/jpeg'
+            elif file_path.endswith('.png'):
+                content_type = 'image/png'
+            elif file_path.endswith('.gif'):
+                content_type = 'image/gif'
+            elif file_path.endswith('.stl'):
+                content_type = 'application/vnd.ms-pki.stl'
+            
+            return Response(content=file_content, media_type=content_type)
+    
+    raise HTTPException(status_code=404, detail="File not found")
+
+
 app.include_router(api_router)
 
 app.add_middleware(
