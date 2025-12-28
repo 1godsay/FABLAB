@@ -91,7 +91,7 @@ const HomePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white border border-neutral-200 rounded-md p-8" data-testid="feature-upload">
               <div className="w-12 h-12 bg-[#FF4D00] rounded-md flex items-center justify-center mb-4">
-                <Cube className="w-6 h-6 text-white" />
+                <Box className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-2">Upload STL</h3>
               <p className="text-neutral-600">Upload your 3D model and get instant volume-based pricing with our automated engine.</p>
