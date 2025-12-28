@@ -334,6 +334,47 @@ async def upload_product_image(
     
     return {"message": "Image uploaded", "image_url": download_url}
 
+@api_router.put("/products/{product_id}/update-volume")
+async def update_product_volume(
+    product_id: str,
+    volume_cm3: float = Form(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Manually update product volume and recalculate price (seller or admin)"""
+    product = await db.products.find_one({"id": product_id})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Check permissions
+    if current_user["role"] not in ["admin", "seller"]:
+        raise HTTPException(status_code=403, detail="Only sellers and admins can update volume")
+    
+    if current_user["role"] == "seller" and product["seller_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only update your own products")
+    
+    if volume_cm3 <= 0:
+        raise HTTPException(status_code=400, detail="Volume must be greater than 0")
+    
+    # Recalculate pricing
+    pricing = calculate_price(volume_cm3, product["material"])
+    
+    await db.products.update_one(
+        {"id": product_id},
+        {"$set": {
+            "volume_cm3": pricing["volume_cm3"],
+            "base_cost": pricing["base_cost"],
+            "platform_margin": pricing["platform_margin"],
+            "final_price": pricing["final_price"]
+        }}
+    )
+    
+    logger.info(f"Product {product_id} volume manually updated to {volume_cm3} cm³")
+    
+    return {
+        "message": "Volume updated successfully",
+        "pricing": pricing
+    }
+
 @api_router.put("/products/{product_id}/publish")
 async def toggle_publish(product_id: str, current_user: dict = Depends(get_current_user)):
     """Publish/unpublish product"""
