@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class MockS3Service:
     """Mock S3 service for testing without AWS credentials"""
     def __init__(self):
-        self.storage_dir = "/tmp/fablab_mock_s3"
+        self.storage_dir = "/app/data/fablab_mock_s3"
         os.makedirs(self.storage_dir, exist_ok=True)
         logger.info("Using Mock S3 Service for file storage")
     
