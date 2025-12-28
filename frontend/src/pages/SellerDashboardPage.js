@@ -22,6 +22,9 @@ const SellerDashboardPage = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [showVolumeDialog, setShowVolumeDialog] = useState(false);
+  const [updatingVolume, setUpdatingVolume] = useState(false);
+  const [manualVolume, setManualVolume] = useState('');
   
   const [formData, setFormData] = useState({
     name: '',
