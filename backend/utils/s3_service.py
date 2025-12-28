@@ -51,6 +51,19 @@ class MockS3Service:
         except Exception as e:
             logger.error(f"Mock S3: Error deleting file: {e}")
             return False
+    
+    def get_file(self, file_key: str) -> Optional[bytes]:
+        """Get file content from local mock storage"""
+        try:
+            file_path = os.path.join(self.storage_dir, file_key.replace('/', '_'))
+            if os.path.exists(file_path):
+                with open(file_path, 'rb') as f:
+                    return f.read()
+            logger.warning(f"Mock S3: File not found {file_key}")
+            return None
+        except Exception as e:
+            logger.error(f"Mock S3: Error reading file: {e}")
+            return None
 
 class S3Service:
     def __init__(self):
