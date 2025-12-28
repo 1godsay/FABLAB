@@ -438,6 +438,77 @@ const SellerDashboardPage = () => {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={showVolumeDialog} onOpenChange={setShowVolumeDialog}>
+        <DialogContent className="max-w-md" data-testid="volume-update-dialog">
+          <DialogHeader>
+            <DialogTitle>Update Product Volume</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-neutral-600 mb-2">
+                  Product: <span className="font-medium">{selectedProduct.name}</span>
+                </p>
+                <p className="text-sm text-neutral-600">
+                  Current Volume: <span className="font-medium">{selectedProduct.volume_cm3} cm³</span>
+                </p>
+                <p className="text-sm text-neutral-600">
+                  Material: <span className="font-medium">{selectedProduct.material}</span>
+                </p>
+              </div>
+              <form onSubmit={handleUpdateVolume} className="space-y-4">
+                <div>
+                  <Label htmlFor="manual-volume">New Volume (cm³)</Label>
+                  <Input
+                    id="manual-volume"
+                    data-testid="manual-volume-input"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={manualVolume}
+                    onChange={(e) => setManualVolume(e.target.value)}
+                    required
+                    className="mt-1"
+                    placeholder="Enter volume in cm³"
+                  />
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Price will be automatically calculated based on volume and material
+                  </p>
+                </div>
+                <div className="bg-neutral-50 p-3 rounded-md">
+                  <p className="text-xs font-medium text-neutral-700 mb-1">Pricing Formula:</p>
+                  <p className="text-xs text-neutral-600">
+                    {selectedProduct.material} rate: ₹
+                    {selectedProduct.material === 'PLA' ? '5' : selectedProduct.material === 'ABS' ? '6' : '8'}/cm³
+                  </p>
+                  <p className="text-xs text-neutral-600">Platform margin: 20%</p>
+                </div>
+                <div className="flex gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowVolumeDialog(false)}
+                    className="flex-1"
+                    data-testid="cancel-volume-btn"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="btn-primary flex-1"
+                    disabled={updatingVolume}
+                    data-testid="update-volume-btn"
+                  >
+                    {updatingVolume ? 'Updating...' : 'Update Volume'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-md" data-testid="delete-confirmation-dialog">
           <DialogHeader>
