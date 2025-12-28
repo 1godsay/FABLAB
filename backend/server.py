@@ -406,7 +406,7 @@ async def verify_payment(
     razorpay_signature: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
-    \"\"\"Verify Razorpay payment\"\"\"
+    """Verify Razorpay payment"""
     try:
         razorpay_client.utility.verify_payment_signature({
             'razorpay_order_id': razorpay_order_id,
