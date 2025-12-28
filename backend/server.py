@@ -27,10 +27,41 @@ app = FastAPI(title="FABLAB API")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
 
-razorpay_client = razorpay.Client(auth=(
-    os.getenv('RAZORPAY_KEY_ID', 'rzp_test_dummy'),
-    os.getenv('RAZORPAY_KEY_SECRET', 'dummy_secret')
-))
+import razorpay
+import uuid
+
+class MockRazorpayClient:
+    """Mock Razorpay client for testing"""
+    def __init__(self):
+        self.order = MockRazorpayOrder()
+        self.utility = MockRazorpayUtility()
+        logger.info("Using Mock Razorpay Client for testing")
+
+class MockRazorpayOrder:
+    def create(self, data):
+        """Mock order creation"""
+        return {
+            "id": f"order_{uuid.uuid4().hex[:10]}",
+            "amount": data["amount"],
+            "currency": data["currency"],
+            "status": "created"
+        }
+
+class MockRazorpayUtility:
+    def verify_payment_signature(self, data):
+        """Mock payment signature verification - always passes"""
+        return True
+
+# Check if we have valid Razorpay credentials
+razorpay_key = os.getenv('RAZORPAY_KEY_ID', 'rzp_test_dummy')
+razorpay_secret = os.getenv('RAZORPAY_KEY_SECRET', 'dummy_secret')
+
+if razorpay_key == 'rzp_test_dummy_key' or razorpay_secret == 'dummy_secret_for_testing':
+    logger.warning("Using dummy Razorpay credentials, switching to Mock Razorpay Client")
+    razorpay_client = MockRazorpayClient()
+else:
+    logger.info("Using real Razorpay Client")
+    razorpay_client = razorpay.Client(auth=(razorpay_key, razorpay_secret))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
