@@ -31,6 +31,7 @@ const SellerDashboardPage = () => {
     description: '',
     category: 'Mechanical',
     material: 'PLA',
+    creator_royalty_percent: 10,
   });
   const [stlFile, setStlFile] = useState(null);
   const [images, setImages] = useState([]);
