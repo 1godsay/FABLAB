@@ -269,6 +269,22 @@ endsolid test"""
         if 'buyer' not in self.tokens or 'test_product' not in self.test_products:
             self.log_result("Create Order", False, error_msg="No buyer token or product available")
             return False
+        
+        # Wait a moment for product approval to be processed
+        import time
+        time.sleep(1)
+        
+        # Verify the product is approved and published
+        product_id = self.test_products['test_product']
+        product_response = self.make_request('GET', f'products/{product_id}')
+        if not product_response or product_response.status_code != 200:
+            self.log_result("Create Order", False, error_msg="Cannot fetch product details")
+            return False
+            
+        product_data = product_response.json()
+        if not product_data.get('is_published') or not product_data.get('is_approved'):
+            self.log_result("Create Order", False, error_msg=f"Product not ready - published: {product_data.get('is_published')}, approved: {product_data.get('is_approved')}")
+            return False
             
         order_data = {
             "items": [
