@@ -419,6 +419,94 @@ async def delete_product(product_id: str, current_user: dict = Depends(get_curre
     
     return {"message": "Product deleted successfully"}
 
+@api_router.post("/custom-print/calculate")
+async def calculate_custom_print(
+    stl_file: UploadFile = File(...),
+    material: str = Form(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Calculate price for custom STL print without creating product listing"""
+    if material not in ["PLA", "ABS", "Resin"]:
+        raise HTTPException(status_code=400, detail="Invalid material")
+    
+    stl_content = await stl_file.read()
+    
+    try:
+        volume_cm3 = calculate_stl_volume(stl_content)
+        pricing = calculate_price(volume_cm3, material)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    # Store STL temporarily for this session
+    file_key = f"custom/{uuid.uuid4()}.stl"
+    success = s3_service.upload_file(stl_content, file_key, 'application/vnd.ms-pki.stl')
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to upload STL file")
+    
+    return {
+        "file_key": file_key,
+        "filename": stl_file.filename,
+        "material": material,
+        "pricing": pricing
+    }
+
+@api_router.post("/custom-print/order")
+async def create_custom_print_order(
+    file_key: str = Form(...),
+    filename: str = Form(...),
+    material: str = Form(...),
+    volume_cm3: float = Form(...),
+    quantity: int = Form(1),
+    current_user: dict = Depends(get_current_user)
+):
+    """Create order for custom print"""
+    pricing = calculate_price(volume_cm3, material)
+    order_amount = pricing["final_price"] * quantity
+    
+    order_dict = {
+        "id": str(uuid.uuid4()),
+        "buyer_id": current_user["id"],
+        "seller_id": "custom_print",  # Special marker for custom prints
+        "product_id": "custom",
+        "product_name": f"Custom Print: {filename}",
+        "quantity": quantity,
+        "total_amount": order_amount,
+        "status": "Order placed",
+        "custom_print": True,
+        "stl_file_key": file_key,
+        "material": material,
+        "volume_cm3": volume_cm3,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    razorpay_order = razorpay_client.order.create({
+        "amount": int(order_amount * 100),
+        "currency": "INR",
+        "payment_capture": 1
+    })
+    
+    order_dict["razorpay_order_id"] = razorpay_order["id"]
+    await db.orders.insert_one(order_dict)
+    
+    transaction_dict = {
+        "id": str(uuid.uuid4()),
+        "order_id": order_dict["id"],
+        "razorpay_order_id": razorpay_order["id"],
+        "amount": order_amount,
+        "currency": "INR",
+        "status": "created",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.transactions.insert_one(transaction_dict)
+    
+    return {
+        "razorpay_order_id": razorpay_order["id"],
+        "amount": order_amount,
+        "currency": "INR",
+        "razorpay_key": os.getenv('RAZORPAY_KEY_ID')
+    }
+
 @api_router.get("/products")
 async def list_products(
     category: Optional[str] = None,
