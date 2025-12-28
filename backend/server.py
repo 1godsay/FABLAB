@@ -290,7 +290,7 @@ async def list_products(
     material: Optional[str] = None,
     seller_id: Optional[str] = None
 ):
-    \"\"\"List all published and approved products\"\"\"
+    """List all published and approved products"""
     query = {"is_published": True, "is_approved": True}
     
     if category:
