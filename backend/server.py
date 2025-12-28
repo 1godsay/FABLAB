@@ -220,6 +220,40 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     """Get current user info"""
     return current_user
 
+@api_router.post("/auth/upgrade-to-seller")
+async def upgrade_to_seller(current_user: dict = Depends(get_current_user)):
+    """Upgrade user account to seller role"""
+    if current_user["role"] == "seller":
+        raise HTTPException(status_code=400, detail="Already a seller")
+    
+    if current_user["role"] == "admin":
+        raise HTTPException(status_code=400, detail="Admin cannot be downgraded to seller")
+    
+    # Update user role to seller
+    result = await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"role": "seller"}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Create new token with updated role
+    token = create_access_token(data={"sub": current_user["email"], "role": "seller"})
+    
+    logger.info(f"User {current_user['email']} upgraded to seller")
+    
+    return {
+        "message": "Successfully upgraded to seller account",
+        "token": token,
+        "user": {
+            "id": current_user["id"],
+            "email": current_user["email"],
+            "name": current_user["name"],
+            "role": "seller"
+        }
+    }
+
 
 @api_router.post("/products/upload-stl")
 async def upload_stl(
