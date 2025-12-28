@@ -340,7 +340,7 @@ async def get_seller_orders(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/orders/create")
 async def create_order(order_data: OrderCreate, current_user: dict = Depends(get_current_user)):
-    \"\"\"Create order and Razorpay payment\"\"\"
+    """Create order and Razorpay payment"""
     if not order_data.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
     
