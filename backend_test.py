@@ -97,7 +97,13 @@ class FABLABAPITester:
 
     def test_user_login(self):
         """Test user login"""
-        login_data = {"email": "seller@test.com", "password": "testpass123"}
+        # Use the registered seller email from registration
+        if 'seller' in self.test_users:
+            login_email = self.test_users['seller']['email']
+        else:
+            login_email = "seller@test.com"  # fallback
+            
+        login_data = {"email": login_email, "password": "testpass123"}
         response = self.make_request('POST', 'auth/login', login_data)
         
         if response and response.status_code == 200:
