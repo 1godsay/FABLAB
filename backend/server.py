@@ -263,6 +263,7 @@ async def upload_stl(
     description: str = Form(...),
     category: str = Form(...),
     material: str = Form(...),
+    creator_royalty_percent: float = Form(10.0),
     stl_file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
 ):
@@ -273,11 +274,14 @@ async def upload_stl(
     if material not in ["PLA", "ABS", "Resin"]:
         raise HTTPException(status_code=400, detail="Invalid material")
     
+    if creator_royalty_percent < 0 or creator_royalty_percent > 50:
+        raise HTTPException(status_code=400, detail="Creator royalty must be between 0% and 50%")
+    
     stl_content = await stl_file.read()
     
     try:
         volume_cm3 = calculate_stl_volume(stl_content)
-        pricing = calculate_price(volume_cm3, material)
+        pricing = calculate_price(volume_cm3, material, creator_royalty_percent)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -299,6 +303,8 @@ async def upload_stl(
         "volume_cm3": pricing["volume_cm3"],
         "base_cost": pricing["base_cost"],
         "platform_margin": pricing["platform_margin"],
+        "creator_royalty_percent": pricing["creator_royalty_percent"],
+        "creator_royalty": pricing["creator_royalty"],
         "final_price": pricing["final_price"],
         "is_published": False,
         "is_approved": False,
