@@ -41,6 +41,22 @@ const ProductDetailPage = () => {
     toast.success('Added to cart');
   };
 
+  const nextImage = () => {
+    if (product.images && product.images.length > 0) {
+      setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
+    }
+  };
+
+  const prevImage = () => {
+    if (product.images && product.images.length > 0) {
+      setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+    }
+  };
+
+  const selectImage = (index) => {
+    setCurrentImageIndex(index);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center" data-testid="loading-indicator">
