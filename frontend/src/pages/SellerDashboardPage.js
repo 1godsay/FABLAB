@@ -73,6 +73,7 @@ const SellerDashboardPage = () => {
       uploadFormData.append('description', formData.description);
       uploadFormData.append('category', formData.category);
       uploadFormData.append('material', formData.material);
+      uploadFormData.append('creator_royalty_percent', formData.creator_royalty_percent);
       uploadFormData.append('stl_file', stlFile);
 
       const response = await api.post('/products/upload-stl', uploadFormData, {
