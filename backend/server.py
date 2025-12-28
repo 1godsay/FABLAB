@@ -437,7 +437,7 @@ async def get_my_orders(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/orders/{order_id}")
 async def get_order(order_id: str, current_user: dict = Depends(get_current_user)):
-    \"\"\"Get order details\"\"\"
+    """Get order details"""
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
