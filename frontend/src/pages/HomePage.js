@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
-import { Cube, ArrowRight, CheckCircle2, Users, Box, Shield } from 'lucide-react';
+import { Box, ArrowRight, CheckCircle2, Users, Shield } from 'lucide-react';
 
 const HomePage = () => {
   const { user } = useAuth();
