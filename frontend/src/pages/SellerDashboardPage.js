@@ -166,6 +166,40 @@ const SellerDashboardPage = () => {
     }
   };
 
+  const openVolumeDialog = (product) => {
+    setSelectedProduct(product);
+    setManualVolume(product.volume_cm3 || '');
+    setShowVolumeDialog(true);
+  };
+
+  const handleUpdateVolume = async (e) => {
+    e.preventDefault();
+    if (!selectedProduct) return;
+
+    const volume = parseFloat(manualVolume);
+    if (isNaN(volume) || volume <= 0) {
+      toast.error('Please enter a valid volume greater than 0');
+      return;
+    }
+
+    setUpdatingVolume(true);
+    try {
+      const formData = new FormData();
+      formData.append('volume_cm3', volume);
+
+      const response = await api.put(`/products/${selectedProduct.id}/update-volume`, formData);
+      
+      toast.success(`Volume updated! New price: ₹${response.data.pricing.final_price}`);
+      setShowVolumeDialog(false);
+      setManualVolume('');
+      fetchProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update volume');
+    } finally {
+      setUpdatingVolume(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <nav className="border-b border-neutral-200">
@@ -240,6 +274,11 @@ const SellerDashboardPage = () => {
                       <p className="text-sm text-neutral-600" data-testid="product-details">
                         {product.category} • {product.material} • {product.volume_cm3} cm³
                       </p>
+                      {product.volume_cm3 === 0 && (
+                        <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                          ⚠️ Volume is 0 - Click "Update Volume" to set manually
+                        </p>
+                      )}
                       <div className="flex gap-2 mt-2">
                         <span className={`px-2 py-1 text-xs rounded ${product.is_published ? 'bg-green-100 text-green-800' : 'bg-neutral-100'}`} data-testid="publish-status">
                           {product.is_published ? 'Published' : 'Draft'}
@@ -253,6 +292,15 @@ const SellerDashboardPage = () => {
                       <div className="text-xl font-mono font-bold text-[#FF4D00]" data-testid="product-price">
                         ₹{product.final_price}
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openVolumeDialog(product)}
+                        className={product.volume_cm3 === 0 ? 'border-amber-500 text-amber-700' : ''}
+                        data-testid={`update-volume-${product.id}`}
+                      >
+                        Update Volume
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -319,6 +367,76 @@ const SellerDashboardPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={showVolumeDialog} onOpenChange={setShowVolumeDialog}>
+        <DialogContent className="max-w-md" data-testid="volume-update-dialog">
+          <DialogHeader>
+            <DialogTitle>Update Product Volume</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-neutral-600 mb-2">
+                  Product: <span className="font-medium">{selectedProduct.name}</span>
+                </p>
+                <p className="text-sm text-neutral-600">
+                  Current Volume: <span className="font-medium">{selectedProduct.volume_cm3} cm³</span>
+                </p>
+                <p className="text-sm text-neutral-600">
+                  Material: <span className="font-medium">{selected Product.material}</span>
+                </p>
+              </div>
+              <form onSubmit={handleUpdateVolume} className="space-y-4">
+                <div>
+                  <Label htmlFor="manual-volume">New Volume (cm³)</Label>
+                  <Input
+                    id="manual-volume"
+                    data-testid="manual-volume-input"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={manualVolume}
+                    onChange={(e) => setManualVolume(e.target.value)}
+                    required
+                    className="mt-1"
+                    placeholder="Enter volume in cm³"
+                  />
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Price will be automatically calculated based on volume and material
+                  </p>
+                </div>
+                <div className="bg-neutral-50 p-3 rounded-md">
+                  <p className="text-xs font-medium text-neutral-700 mb-1">Pricing Formula:</p>
+                  <p className="text-xs text-neutral-600">
+                    {selectedProduct.material} rate: ₹
+                    {selectedProduct.material === 'PLA' ? '5' : selectedProduct.material === 'ABS' ? '6' : '8'}/cm³
+                  </p>
+                  <p className="text-xs text-neutral-600">Platform margin: 20%</p>
+                </div>
+                <div className="flex gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowVolumeDialog(false)}
+                    className="flex-1"
+                    data-testid="cancel-volume-btn"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="btn-primary flex-1"
+                    disabled={updatingVolume}
+                    data-testid="update-volume-btn"
+                  >
+                    {updatingVolume ? 'Updating...' : 'Update Volume'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-md" data-testid="delete-confirmation-dialog">
