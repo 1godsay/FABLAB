@@ -501,7 +501,7 @@ async def update_order_status(
 
 @api_router.get("/admin/products/pending")
 async def get_pending_products(current_user: dict = Depends(get_current_user)):
-    \"\"\"Get products pending approval (admin only)\"\"\"
+    """Get products pending approval (admin only)"""
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
