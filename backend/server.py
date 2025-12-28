@@ -622,6 +622,38 @@ async def approve_product(
     
     return {"message": f"Product {'approved' if approved else 'rejected'}", "is_approved": approved}
 
+@api_router.delete("/admin/products/{product_id}")
+async def admin_delete_product(product_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete any product (admin only)"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    product = await db.products.find_one({"id": product_id})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Delete associated files from S3/mock storage
+    try:
+        # Delete STL file
+        if product.get("stl_file_key"):
+            s3_service.delete_file(product["stl_file_key"])
+        
+        # Delete images
+        for image_url in product.get("images", []):
+            # Extract file key from URL
+            if "/api/files/mock/" in image_url:
+                file_key = image_url.split("/api/files/mock/")[1]
+                s3_service.delete_file(file_key)
+    except Exception as e:
+        logger.warning(f"Error deleting files for product {product_id}: {e}")
+    
+    # Delete product from database
+    await db.products.delete_one({"id": product_id})
+    
+    logger.info(f"Product {product_id} deleted by admin {current_user['id']}")
+    
+    return {"message": "Product deleted successfully"}
+
 
 @api_router.get("/health")
 async def health_check():
