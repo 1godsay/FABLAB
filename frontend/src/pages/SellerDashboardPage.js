@@ -383,7 +383,7 @@ const SellerDashboardPage = () => {
                   Current Volume: <span className="font-medium">{selectedProduct.volume_cm3} cm³</span>
                 </p>
                 <p className="text-sm text-neutral-600">
-                  Material: <span className="font-medium">{selected Product.material}</span>
+                  Material: <span className="font-medium">{selectedProduct.material}</span>
                 </p>
               </div>
               <form onSubmit={handleUpdateVolume} className="space-y-4">
