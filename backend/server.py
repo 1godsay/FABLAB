@@ -248,7 +248,7 @@ async def upload_product_image(
     image: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
 ):
-    \"\"\"Upload product image\"\"\"
+    """Upload product image"""
     product = await db.products.find_one({"id": product_id, "seller_id": current_user["id"]})
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
