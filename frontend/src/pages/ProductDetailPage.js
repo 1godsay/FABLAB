@@ -31,6 +31,13 @@ const ProductDetailPage = () => {
   };
 
   const addToCart = () => {
+    // Check if user is logged in
+    if (!user) {
+      toast.error('Please login to add items to cart');
+      navigate('/auth');
+      return;
+    }
+
     const cart = JSON.parse(localStorage.getItem('fablab_cart') || '[]');
     const existingItem = cart.find(item => item.product_id === product.id);
     
