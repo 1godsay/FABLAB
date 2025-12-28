@@ -46,6 +46,13 @@ const MarketplacePage = () => {
   };
 
   const addToCart = (product) => {
+    // Check if user is logged in
+    if (!user) {
+      toast.error('Please login to add items to cart');
+      navigate('/auth');
+      return;
+    }
+
     const existingItem = cart.find(item => item.product_id === product.id);
     let newCart;
     
