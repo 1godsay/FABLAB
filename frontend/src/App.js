@@ -12,6 +12,7 @@ import OrdersPage from './pages/OrdersPage';
 import SellerDashboardPage from './pages/SellerDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ProfilePage from './pages/ProfilePage';
+import CustomPrintPage from './pages/CustomPrintPage';
 
 import '@/App.css';
 
@@ -42,6 +43,7 @@ function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
+          <Route path="/custom-print" element={<CustomPrintPage />} />
           <Route path="/cart" element={<CartPage />} />
           
           <Route
