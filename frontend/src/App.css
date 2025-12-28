@@ -1,34 +1,15 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+.product-card {
+  @apply bg-white border border-neutral-200 rounded-md hover:border-neutral-300 transition-colors;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.order-status-badge {
+  @apply px-3 py-1 text-xs font-medium rounded-full;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.dashboard-grid {
+  @apply grid grid-cols-1 md:grid-cols-4 gap-4;
 }
 
-.App-link {
-    color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.marketplace-grid {
+  @apply grid grid-cols-1 md:grid-cols-12 gap-8;
 }
