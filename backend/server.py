@@ -514,7 +514,7 @@ async def approve_product(
     approved: bool = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
-    \"\"\"Approve or reject product (admin only)\"\"\"
+    """Approve or reject product (admin only)"""
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
