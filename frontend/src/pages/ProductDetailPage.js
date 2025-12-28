@@ -4,12 +4,13 @@ import api from '../utils/api';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, Box, Layers } from 'lucide-react';
+import { ArrowLeft, Box, Layers, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     fetchProduct();
