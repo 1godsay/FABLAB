@@ -9,7 +9,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { toast } from 'sonner';
-import { Upload, Package, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
+import { Upload, Package, Eye, EyeOff, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 const SellerDashboardPage = () => {
   const [products, setProducts] = useState([]);
@@ -19,6 +19,9 @@ const SellerDashboardPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -141,6 +144,28 @@ const SellerDashboardPage = () => {
     }
   };
 
+  const openDeleteDialog = (product) => {
+    setProductToDelete(product);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteProduct = async () => {
+    if (!productToDelete) return;
+
+    setDeleting(true);
+    try {
+      await api.delete(`/products/${productToDelete.id}`);
+      toast.success('Product deleted successfully!');
+      setShowDeleteDialog(false);
+      setProductToDelete(null);
+      fetchProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete product');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <nav className="border-b border-neutral-200">
@@ -246,6 +271,16 @@ const SellerDashboardPage = () => {
                         {product.is_published ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
                         {product.is_published ? 'Unpublish' : 'Publish'}
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-red-200 text-red-600 hover:bg-red-50"
+                        onClick={() => openDeleteDialog(product)}
+                        data-testid={`delete-product-${product.id}`}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -284,6 +319,44 @@ const SellerDashboardPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md" data-testid="delete-confirmation-dialog">
+          <DialogHeader>
+            <DialogTitle>Delete Product</DialogTitle>
+          </DialogHeader>
+          {productToDelete && (
+            <div className="space-y-4">
+              <p className="text-neutral-600">
+                Are you sure you want to delete <span className="font-bold">{productToDelete.name}</span>?
+              </p>
+              <p className="text-sm text-red-600">
+                This action cannot be undone. All product data, images, and STL files will be permanently deleted.
+              </p>
+              <div className="flex gap-4 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowDeleteDialog(false)}
+                  className="flex-1"
+                  data-testid="cancel-delete-btn"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                  onClick={handleDeleteProduct}
+                  disabled={deleting}
+                  data-testid="confirm-delete-btn"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Product'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
         <DialogContent className="max-w-md" data-testid="image-upload-dialog">
