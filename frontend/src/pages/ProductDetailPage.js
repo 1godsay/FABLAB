@@ -200,6 +200,12 @@ const ProductDetailPage = () => {
                     <span className="text-neutral-600">Platform Fee (20%)</span>
                     <span className="font-mono" data-testid="platform-margin">₹{product.platform_margin}</span>
                   </div>
+                  {product.creator_royalty && product.creator_royalty > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">Creator Royalty ({product.creator_royalty_percent}%)</span>
+                      <span className="font-mono" data-testid="creator-royalty">₹{product.creator_royalty}</span>
+                    </div>
+                  )}
                   <div className="border-t border-neutral-200 pt-4 flex justify-between items-end">
                     <span className="text-lg font-semibold">Total Price</span>
                     <span className="text-3xl font-mono font-bold text-[#FF4D00]" data-testid="final-price">
