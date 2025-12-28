@@ -9,13 +9,16 @@ import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { toast } from 'sonner';
-import { Upload, Package, Eye, EyeOff } from 'lucide-react';
+import { Upload, Package, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
 
 const SellerDashboardPage = () => {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -89,6 +92,52 @@ const SellerDashboardPage = () => {
       fetchProducts();
     } catch (error) {
       toast.error('Failed to update product');
+    }
+  };
+
+  const openImageUpload = (product) => {
+    setSelectedProduct(product);
+    setShowImageDialog(true);
+  };
+
+  const handleImageUpload = async (e) => {
+    e.preventDefault();
+    const fileInput = e.target.querySelector('input[type="file"]');
+    const file = fileInput?.files[0];
+
+    if (!file) {
+      toast.error('Please select an image');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      await api.post(`/products/${selectedProduct.id}/upload-image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      toast.success('Image uploaded successfully!');
+      setShowImageDialog(false);
+      fetchProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -175,10 +224,19 @@ const SellerDashboardPage = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="text-right flex flex-col justify-between">
+                    <div className="text-right flex flex-col justify-between gap-2">
                       <div className="text-xl font-mono font-bold text-[#FF4D00]" data-testid="product-price">
                         ₹{product.final_price}
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openImageUpload(product)}
+                        data-testid={`add-image-${product.id}`}
+                      >
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        Add Images ({product.images?.length || 0})
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -226,6 +284,71 @@ const SellerDashboardPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+        <DialogContent className="max-w-md" data-testid="image-upload-dialog">
+          <DialogHeader>
+            <DialogTitle>Add Product Images</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-neutral-600 mb-2">Product: <span className="font-medium">{selectedProduct.name}</span></p>
+                {selectedProduct.images && selectedProduct.images.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-sm font-medium mb-2">Current Images ({selectedProduct.images.length}):</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {selectedProduct.images.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={`Product ${idx + 1}`}
+                          className="w-full h-24 object-cover rounded border border-neutral-200"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <form onSubmit={handleImageUpload} className="space-y-4">
+                <div>
+                  <Label htmlFor="product-image">Upload New Image</Label>
+                  <Input
+                    id="product-image"
+                    data-testid="image-upload-input"
+                    type="file"
+                    accept="image/*"
+                    required
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Supported: JPG, PNG, GIF (Max 5MB)
+                  </p>
+                </div>
+                <div className="flex gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowImageDialog(false)}
+                    className="flex-1"
+                    data-testid="cancel-image-btn"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="btn-primary flex-1"
+                    disabled={uploadingImage}
+                    data-testid="upload-image-btn"
+                  >
+                    {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
         <DialogContent className="max-w-2xl" data-testid="upload-dialog">
