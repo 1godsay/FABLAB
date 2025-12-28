@@ -199,7 +199,7 @@ async def upload_stl(
     stl_file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
 ):
-    \"\"\"Upload STL file and create product\"\"\"
+    """Upload STL file and create product"""
     if current_user["role"] != "seller":
         raise HTTPException(status_code=403, detail="Only sellers can upload products")
     
