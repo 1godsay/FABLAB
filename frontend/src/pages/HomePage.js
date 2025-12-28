@@ -17,6 +17,9 @@ const HomePage = () => {
             <Link to="/marketplace" data-testid="marketplace-link">
               <Button variant="ghost" data-testid="marketplace-nav-btn">Marketplace</Button>
             </Link>
+            <Link to="/custom-print" data-testid="custom-print-link">
+              <Button variant="ghost" data-testid="custom-print-nav-btn">Custom Print</Button>
+            </Link>
             {user ? (
               <>
                 {user.role === 'seller' && (
