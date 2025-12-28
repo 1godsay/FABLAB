@@ -76,16 +76,24 @@ const MarketplacePage = () => {
       <nav className="border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="text-2xl font-bold tracking-tight" data-testid="logo-link">FABLAB</Link>
-          <Link to="/cart" data-testid="cart-link">
-            <Button variant="ghost" className="relative" data-testid="cart-btn">
-              <ShoppingCart className="w-5 h-5" />
-              {cart.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#FF4D00] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" data-testid="cart-count">
-                  {cart.length}
-                </span>
-              )}
-            </Button>
-          </Link>
+          <div className="flex items-center gap-4">
+            {user ? (
+              <Link to="/cart" data-testid="cart-link">
+                <Button variant="ghost" className="relative" data-testid="cart-btn">
+                  <ShoppingCart className="w-5 h-5" />
+                  {cart.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-[#FF4D00] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" data-testid="cart-count">
+                      {cart.length}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/auth" data-testid="login-link">
+                <Button className="btn-primary" data-testid="login-btn">Login / Sign Up</Button>
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
 
