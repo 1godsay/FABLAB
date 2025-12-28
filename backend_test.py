@@ -34,7 +34,7 @@ class FABLABAPITester:
         """Make HTTP request with error handling"""
         url = f"{self.base_url}/{endpoint}"
         
-        request_headers = {'Content-Type': 'application/json'}
+        request_headers = {}
         if headers:
             request_headers.update(headers)
         if token:
@@ -45,18 +45,25 @@ class FABLABAPITester:
                 response = requests.get(url, headers=request_headers)
             elif method == 'POST':
                 if files:
-                    # Remove Content-Type for multipart/form-data
-                    if 'Content-Type' in request_headers:
-                        del request_headers['Content-Type']
+                    # For multipart/form-data (file uploads)
                     response = requests.post(url, data=data, files=files, headers=request_headers)
+                elif isinstance(data, dict) and not any(isinstance(v, (list, dict)) for v in data.values()):
+                    # For simple form data
+                    response = requests.post(url, data=data, headers=request_headers)
                 else:
+                    # For JSON data
+                    request_headers['Content-Type'] = 'application/json'
                     response = requests.post(url, json=data, headers=request_headers)
             elif method == 'PUT':
                 if files:
-                    if 'Content-Type' in request_headers:
-                        del request_headers['Content-Type']
+                    # For multipart/form-data (file uploads)
                     response = requests.put(url, data=data, files=files, headers=request_headers)
+                elif isinstance(data, dict) and not any(isinstance(v, (list, dict)) for v in data.values()):
+                    # For simple form data
+                    response = requests.put(url, data=data, headers=request_headers)
                 else:
+                    # For JSON data
+                    request_headers['Content-Type'] = 'application/json'
                     response = requests.put(url, json=data, headers=request_headers)
             
             return response
