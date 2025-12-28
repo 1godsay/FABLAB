@@ -330,7 +330,7 @@ async def get_seller_products(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/seller/orders")
 async def get_seller_orders(current_user: dict = Depends(get_current_user)):
-    \"\"\"Get seller's orders\"\"\"
+    """Get seller's orders"""
     if current_user["role"] != "seller":
         raise HTTPException(status_code=403, detail="Only sellers can access this")
     
