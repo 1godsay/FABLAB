@@ -6,11 +6,18 @@ from typing import Optional
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Setup logging first
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Load environment variables from the backend .env file
 env_path = Path(__file__).resolve().parent.parent / '.env'
-load_dotenv(env_path)
+logger.info(f"Loading .env from: {env_path}")
+load_dotenv(env_path, override=True)
 
-logger = logging.getLogger(__name__)
+# Debug: print loaded values
+logger.info(f"AWS_ACCESS_KEY_ID loaded: {os.getenv('AWS_ACCESS_KEY_ID', 'NOT SET')[:10] if os.getenv('AWS_ACCESS_KEY_ID') else 'NOT SET'}...")
+logger.info(f"S3_BUCKET_NAME: {os.getenv('S3_BUCKET_NAME', 'NOT SET')}")
 
 class S3Service:
     def __init__(self):
