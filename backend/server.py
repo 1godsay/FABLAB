@@ -556,6 +556,7 @@ async def list_products(
     
     for product in products:
         product["created_at"] = product["created_at"]
+        fix_image_urls(product)
     
     return {"products": products}
 
@@ -568,6 +569,7 @@ async def get_product(product_id: str):
     
     stl_url = s3_service.generate_download_url(product["stl_file_key"])
     product["stl_download_url"] = stl_url
+    fix_image_urls(product)
     
     return product
 
@@ -578,6 +580,8 @@ async def get_seller_products(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Only sellers can access this")
     
     products = await db.products.find({"seller_id": current_user["id"]}, {"_id": 0}).to_list(100)
+    for product in products:
+        fix_image_urls(product)
     return {"products": products}
 
 @api_router.get("/seller/orders")
