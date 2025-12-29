@@ -1124,7 +1124,7 @@ async def get_admin_analytics(current_user: dict = Depends(get_current_user)):
             "by_material": [{"material": r["_id"], "revenue": round(r["revenue"], 2), "orders": r["count"]} for r in revenue_by_material]
         },
         "orders": {
-            "total": len(orders),
+            "total": await db.orders.count_documents({}),
             "completed": completed_orders,
             "pending": pending_orders,
             "status_breakdown": [{"status": s["_id"], "count": s["count"]} for s in order_status_breakdown],
