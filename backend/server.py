@@ -15,6 +15,7 @@ import razorpay
 from utils.auth import hash_password, verify_password, create_access_token, decode_token
 from utils.s3_service import s3_service
 from utils.stl_parser import calculate_stl_volume, calculate_price
+from utils.email_service import email_service
 import re
 
 ROOT_DIR = Path(__file__).parent
