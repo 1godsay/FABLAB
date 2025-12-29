@@ -21,12 +21,12 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 def fix_image_urls(product: dict) -> dict:
-    """Fix image URLs to use current BACKEND_URL"""
+    """Fix image URLs - handle both old mock URLs and new S3 URLs"""
     if "images" in product and product["images"]:
         backend_url = os.getenv('BACKEND_URL', '')
         fixed_images = []
         for img_url in product["images"]:
-            # Extract the file path from any URL format
+            # If it's an old mock URL, try to fix it
             if "/api/files/mock/" in img_url:
                 # Extract path after /api/files/mock/
                 match = re.search(r'/api/files/mock/(.+)$', img_url)
@@ -36,6 +36,7 @@ def fix_image_urls(product: dict) -> dict:
                 else:
                     fixed_images.append(img_url)
             else:
+                # S3 URLs or other URLs - keep as-is
                 fixed_images.append(img_url)
         product["images"] = fixed_images
     return product
