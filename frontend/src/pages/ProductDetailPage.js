@@ -197,7 +197,7 @@ const ProductDetailPage = () => {
                         <ChevronLeft className="w-6 h-6 text-neutral-800" />
                       </button>
                       <button
-                        onClick={nextImage}
+                        onClick={(e) => { e.stopPropagation(); nextImage(); }}
                         className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all"
                         data-testid="next-image-btn"
                         aria-label="Next image"
@@ -208,7 +208,7 @@ const ProductDetailPage = () => {
                         {product.images.map((_, index) => (
                           <button
                             key={index}
-                            onClick={() => selectImage(index)}
+                            onClick={(e) => { e.stopPropagation(); selectImage(index); }}
                             className={`w-2 h-2 rounded-full transition-all ${
                               index === currentImageIndex 
                                 ? 'bg-[#FF4D00] w-6' 
