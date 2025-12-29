@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 # Load environment variables FIRST before anything else
 env_path = Path(__file__).resolve().parent.parent / '.env'
-load_dotenv(env_path, override=True)
+load_dotenv(env_path, override=False)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
