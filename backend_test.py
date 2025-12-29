@@ -7,7 +7,7 @@ from datetime import datetime
 class FABLABAPITester:
     def __init__(self):
         # Get the backend URL from frontend .env
-        self.base_url = "https://design3d-hub-4.preview.emergentagent.com/api"
+        self.base_url = "https://fabstore.preview.emergentagent.com/api"
         self.tokens = {}
         self.test_users = {}
         self.test_products = {}
