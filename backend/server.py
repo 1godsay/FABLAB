@@ -908,6 +908,179 @@ async def admin_delete_product(product_id: str, current_user: dict = Depends(get
     return {"message": "Product deleted successfully"}
 
 
+# ============== REVIEWS API ==============
+
+@api_router.post("/reviews")
+async def create_review(review_data: ReviewCreate, current_user: dict = Depends(get_current_user)):
+    """Create a review for a product (buyers only, must have purchased)"""
+    if current_user["role"] not in ["buyer", "seller"]:
+        raise HTTPException(status_code=403, detail="Only buyers can leave reviews")
+    
+    # Check if product exists
+    product = await db.products.find_one({"id": review_data.product_id})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Check if user has already reviewed this product
+    existing_review = await db.reviews.find_one({
+        "product_id": review_data.product_id,
+        "buyer_id": current_user["id"]
+    })
+    if existing_review:
+        raise HTTPException(status_code=400, detail="You have already reviewed this product")
+    
+    # Create review
+    review_dict = {
+        "id": str(uuid.uuid4()),
+        "product_id": review_data.product_id,
+        "buyer_id": current_user["id"],
+        "buyer_name": current_user["name"],
+        "rating": review_data.rating,
+        "comment": review_data.comment,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.reviews.insert_one(review_dict)
+    
+    # Update product's average rating
+    all_reviews = await db.reviews.find({"product_id": review_data.product_id}).to_list(1000)
+    avg_rating = sum(r["rating"] for r in all_reviews) / len(all_reviews)
+    review_count = len(all_reviews)
+    
+    await db.products.update_one(
+        {"id": review_data.product_id},
+        {"$set": {"avg_rating": round(avg_rating, 1), "review_count": review_count}}
+    )
+    
+    return {"message": "Review submitted successfully", "review_id": review_dict["id"]}
+
+@api_router.get("/products/{product_id}/reviews")
+async def get_product_reviews(product_id: str):
+    """Get all reviews for a product"""
+    reviews = await db.reviews.find({"product_id": product_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Get product's average rating
+    product = await db.products.find_one({"id": product_id}, {"_id": 0, "avg_rating": 1, "review_count": 1})
+    
+    return {
+        "reviews": reviews,
+        "avg_rating": product.get("avg_rating", 0) if product else 0,
+        "review_count": product.get("review_count", 0) if product else 0
+    }
+
+@api_router.delete("/reviews/{review_id}")
+async def delete_review(review_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a review (owner or admin only)"""
+    review = await db.reviews.find_one({"id": review_id})
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    if review["buyer_id"] != current_user["id"] and current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to delete this review")
+    
+    product_id = review["product_id"]
+    await db.reviews.delete_one({"id": review_id})
+    
+    # Recalculate average rating
+    all_reviews = await db.reviews.find({"product_id": product_id}).to_list(1000)
+    if all_reviews:
+        avg_rating = sum(r["rating"] for r in all_reviews) / len(all_reviews)
+        review_count = len(all_reviews)
+    else:
+        avg_rating = 0
+        review_count = 0
+    
+    await db.products.update_one(
+        {"id": product_id},
+        {"$set": {"avg_rating": round(avg_rating, 1), "review_count": review_count}}
+    )
+    
+    return {"message": "Review deleted successfully"}
+
+
+# ============== ADMIN ANALYTICS API ==============
+
+@api_router.get("/admin/analytics")
+async def get_admin_analytics(current_user: dict = Depends(get_current_user)):
+    """Get analytics data for admin dashboard"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Total revenue from completed orders
+    orders = await db.orders.find({}).to_list(10000)
+    total_revenue = sum(o.get("total_amount", 0) for o in orders if o.get("status") in ["Delivered", "Shipped", "Order placed", "Printing"])
+    completed_orders = len([o for o in orders if o.get("status") == "Delivered"])
+    pending_orders = len([o for o in orders if o.get("status") in ["Order placed", "Printing", "Shipped"]])
+    
+    # User stats
+    total_users = await db.users.count_documents({})
+    total_buyers = await db.users.count_documents({"role": "buyer"})
+    total_sellers = await db.users.count_documents({"role": "seller"})
+    
+    # Product stats
+    total_products = await db.products.count_documents({})
+    published_products = await db.products.count_documents({"is_published": True, "is_approved": True})
+    pending_approval = await db.products.count_documents({"is_approved": False})
+    
+    # Top selling products (by order count)
+    pipeline = [
+        {"$group": {"_id": "$product_id", "order_count": {"$sum": 1}, "total_revenue": {"$sum": "$total_amount"}, "product_name": {"$first": "$product_name"}}},
+        {"$sort": {"order_count": -1}},
+        {"$limit": 5}
+    ]
+    top_products = await db.orders.aggregate(pipeline).to_list(5)
+    
+    # Top rated products
+    top_rated = await db.products.find(
+        {"avg_rating": {"$gt": 0}, "is_published": True, "is_approved": True},
+        {"_id": 0, "id": 1, "name": 1, "avg_rating": 1, "review_count": 1}
+    ).sort("avg_rating", -1).limit(5).to_list(5)
+    
+    # Revenue by material
+    material_pipeline = [
+        {"$lookup": {"from": "products", "localField": "product_id", "foreignField": "id", "as": "product"}},
+        {"$unwind": "$product"},
+        {"$group": {"_id": "$product.material", "revenue": {"$sum": "$total_amount"}, "count": {"$sum": 1}}},
+        {"$sort": {"revenue": -1}}
+    ]
+    revenue_by_material = await db.orders.aggregate(material_pipeline).to_list(10)
+    
+    # Recent orders (last 10)
+    recent_orders = await db.orders.find({}, {"_id": 0}).sort("created_at", -1).limit(10).to_list(10)
+    
+    # Order status breakdown
+    status_pipeline = [
+        {"$group": {"_id": "$status", "count": {"$sum": 1}}}
+    ]
+    order_status_breakdown = await db.orders.aggregate(status_pipeline).to_list(10)
+    
+    return {
+        "revenue": {
+            "total": round(total_revenue, 2),
+            "by_material": [{"material": r["_id"], "revenue": round(r["revenue"], 2), "orders": r["count"]} for r in revenue_by_material]
+        },
+        "orders": {
+            "total": len(orders),
+            "completed": completed_orders,
+            "pending": pending_orders,
+            "status_breakdown": [{"status": s["_id"], "count": s["count"]} for s in order_status_breakdown],
+            "recent": recent_orders
+        },
+        "users": {
+            "total": total_users,
+            "buyers": total_buyers,
+            "sellers": total_sellers
+        },
+        "products": {
+            "total": total_products,
+            "published": published_products,
+            "pending_approval": pending_approval,
+            "top_selling": [{"product_id": p["_id"], "name": p["product_name"], "orders": p["order_count"], "revenue": round(p["total_revenue"], 2)} for p in top_products],
+            "top_rated": top_rated
+        }
+    }
+
+
 @api_router.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "FABLAB API"}
