@@ -6,7 +6,8 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowLeft, Box, Layers, ChevronLeft, ChevronRight, Star, User } from 'lucide-react';
+import { ArrowLeft, Box, Layers, ChevronLeft, ChevronRight, Star, User, ZoomIn } from 'lucide-react';
+import ImageLightbox from '../components/ImageLightbox';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -15,6 +16,7 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [avgRating, setAvgRating] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
