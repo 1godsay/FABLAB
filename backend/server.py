@@ -467,9 +467,9 @@ async def calculate_custom_print(
     
     # Store STL temporarily for this session
     file_key = f"custom/{uuid.uuid4()}.stl"
-    success = s3_service.upload_file(stl_content, file_key, 'application/vnd.ms-pki.stl')
+    stl_url = s3_service.upload_file(stl_content, file_key, 'application/vnd.ms-pki.stl')
     
-    if not success:
+    if not stl_url:
         raise HTTPException(status_code=500, detail="Failed to upload STL file")
     
     return {
