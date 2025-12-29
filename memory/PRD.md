@@ -14,12 +14,17 @@ FABLAB is a full-stack marketplace for 3D printing services and digital designs,
 - **Database**: MongoDB
 - **File Storage**: AWS S3 (ap-south-1 region)
 - **Payments**: Razorpay (LIVE keys configured)
+- **Email**: SendGrid (transactional emails)
 
 ## AWS S3 Configuration
 - **Bucket**: fablab-files-storage
 - **Region**: ap-south-1 (Mumbai)
 - **Public Access**: Enabled for `/images/*` folder only
 - **STL Files**: Private (accessed via presigned URLs)
+
+## SendGrid Configuration
+- **Sender Email**: godsaystudios@gmail.com
+- **Sender Name**: FABLAB
 
 ## What's Implemented ✅
 
@@ -42,11 +47,17 @@ FABLAB is a full-stack marketplace for 3D printing services and digital designs,
 - [x] Public marketplace (guest browsing)
 - [x] Product filtering (category, material)
 - [x] Product detail page with image gallery
-- [x] **Star ratings on product cards**
+- [x] **Image zoom/fullscreen lightbox** ✅
+- [x] Star ratings on product cards
 - [x] Cart functionality
 - [x] Custom print page for private orders
 
-### Reviews & Ratings System ✅ (NEW)
+### Order System
+- [x] **Order tracking page for buyers** ✅
+- [x] Visual progress tracker (5 stages)
+- [x] Order history
+
+### Reviews & Ratings System
 - [x] Submit reviews with 1-5 star rating
 - [x] Review comments and display
 - [x] Average rating calculation
@@ -57,13 +68,18 @@ FABLAB is a full-stack marketplace for 3D printing services and digital designs,
 - [x] Admin dashboard
 - [x] Product approval/rejection
 - [x] Delete any product
-- [x] **Analytics Dashboard** ✅ (NEW)
+- [x] Analytics Dashboard
   - Total revenue tracking
   - Top selling products
   - Top rated products
   - Revenue by material
   - Order status breakdown
   - User statistics
+
+### Email Notifications ✅
+- [x] Order confirmation to buyer
+- [x] Order status updates to buyer
+- [x] New order notification to seller
 
 ### Payments
 - [x] Razorpay integration (LIVE)
@@ -72,32 +88,24 @@ FABLAB is a full-stack marketplace for 3D printing services and digital designs,
 - [x] AWS S3 integration (PRODUCTION)
 - [x] Public URLs for images
 - [x] Presigned URLs for STL downloads
-- [x] Fallback placeholders for missing images
 
 ## Key Files
-- `/app/backend/server.py` - Main API with reviews & analytics
+- `/app/backend/server.py` - Main API
 - `/app/backend/utils/s3_service.py` - AWS S3 service
-- `/app/backend/.env` - Environment variables (AWS, Razorpay, JWT)
-- `/app/frontend/src/pages/AdminDashboardPage.js` - Admin with analytics
-- `/app/frontend/src/pages/ProductDetailPage.js` - Product page with reviews
-- `/app/frontend/src/pages/MarketplacePage.js` - Shows ratings on cards
-
-## API Endpoints (New)
-- `POST /api/reviews` - Submit a review
-- `GET /api/products/{id}/reviews` - Get product reviews
-- `DELETE /api/reviews/{id}` - Delete a review
-- `GET /api/admin/analytics` - Get admin analytics data
+- `/app/backend/utils/email_service.py` - SendGrid email service
+- `/app/backend/.env` - Environment variables
+- `/app/frontend/src/components/ImageLightbox.js` - Zoom/fullscreen viewer
+- `/app/frontend/src/pages/OrdersPage.js` - Order tracking
 
 ## Test Accounts
 - **Admin**: admin@fablab.com / admin123
 - **Seller**: testseller@fablab.com / test123
 
 ## Future Tasks (P2)
-- [ ] Image zoom/fullscreen viewer
 - [ ] Wishlist feature
 - [ ] Product comparison
-- [ ] Email notifications
-- [ ] Order tracking page for buyers
+- [ ] Search functionality
+- [ ] Seller earnings dashboard
 
 ---
 Last Updated: December 29, 2025
