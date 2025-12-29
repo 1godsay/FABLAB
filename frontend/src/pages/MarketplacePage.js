@@ -7,7 +7,7 @@ import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Card, CardContent } from '../components/ui/card';
 import { toast } from 'sonner';
-import { Filter, ShoppingCart } from 'lucide-react';
+import { Filter, ShoppingCart, Star } from 'lucide-react';
 
 const MarketplacePage = () => {
   const { user } = useAuth();
