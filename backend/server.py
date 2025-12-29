@@ -165,6 +165,21 @@ class Transaction(BaseModel):
     status: str = "created"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Review(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_id: str
+    buyer_id: str
+    buyer_name: str
+    rating: int = Field(ge=1, le=5)
+    comment: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ReviewCreate(BaseModel):
+    product_id: str
+    rating: int = Field(ge=1, le=5)
+    comment: str
+
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
     """Verify JWT token and return user data"""
