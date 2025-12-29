@@ -87,20 +87,11 @@ class S3Service:
             return None
             
         try:
-            # For images, make them publicly readable
-            extra_args = {
-                'ContentType': content_type
-            }
-            
-            # Images should be public, STL files should be private
-            if content_type.startswith('image/'):
-                extra_args['ACL'] = 'public-read'
-            
             self.s3_client.put_object(
                 Bucket=self.bucket_name,
                 Key=file_key,
                 Body=file_content,
-                **extra_args
+                ContentType=content_type
             )
             
             logger.info(f"Uploaded file to S3: {file_key}")
