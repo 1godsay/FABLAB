@@ -313,7 +313,7 @@ const SellerDashboardPage = () => {
                         data-testid={`add-image-${product.id}`}
                       >
                         <ImageIcon className="w-4 h-4 mr-2" />
-                        Add Images ({product.images?.length || 0})
+                        Manage Images ({product.images?.length || 0})
                       </Button>
                       <Button
                         variant="outline"
