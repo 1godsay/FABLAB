@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { toast } from 'sonner';
-import { Users, Package, ShoppingBag, CheckCircle, XCircle } from 'lucide-react';
+import { Users, Package, ShoppingBag, CheckCircle, XCircle, TrendingUp, IndianRupee, Star, BarChart3 } from 'lucide-react';
 
 const AdminDashboardPage = () => {
   const [users, setUsers] = useState([]);
@@ -15,6 +15,7 @@ const AdminDashboardPage = () => {
   const [orders, setOrders] = useState([]);
   const [pendingProducts, setPendingProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -25,12 +26,13 @@ const AdminDashboardPage = () => {
 
   const fetchData = async () => {
     try {
-      const [usersRes, sellersRes, ordersRes, productsRes, allProductsRes] = await Promise.all([
+      const [usersRes, sellersRes, ordersRes, productsRes, allProductsRes, analyticsRes] = await Promise.all([
         api.get('/admin/users'),
         api.get('/admin/sellers'),
         api.get('/admin/orders'),
         api.get('/admin/products/pending'),
-        api.get('/admin/products/all')
+        api.get('/admin/products/all'),
+        api.get('/admin/analytics')
       ]);
       
       setUsers(usersRes.data.users);
@@ -38,6 +40,7 @@ const AdminDashboardPage = () => {
       setOrders(ordersRes.data.orders);
       setPendingProducts(productsRes.data.products);
       setAllProducts(allProductsRes.data.products);
+      setAnalytics(analyticsRes.data);
     } catch (error) {
       toast.error('Failed to load admin data');
     }
@@ -103,63 +106,204 @@ const AdminDashboardPage = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         <h1 className="text-4xl font-bold tracking-tight mb-8" data-testid="page-title">Admin Dashboard</h1>
 
-        <div className="dashboard-grid mb-8">
-          <Card className="border-neutral-200" data-testid="total-users-card">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-neutral-600">Total Users</CardTitle>
+        {/* Analytics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card className="border-neutral-200 bg-gradient-to-br from-green-50 to-white" data-testid="revenue-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-neutral-600">Total Revenue</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold" data-testid="total-users-count">{users.length}</div>
-                <Users className="w-8 h-8 text-neutral-300" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-neutral-200" data-testid="total-sellers-card">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-neutral-600">Sellers</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold" data-testid="total-sellers-count">{sellers.length}</div>
-                <Package className="w-8 h-8 text-neutral-300" />
+                <div className="text-2xl md:text-3xl font-bold text-green-600" data-testid="total-revenue">
+                  ₹{analytics?.revenue?.total?.toLocaleString() || 0}
+                </div>
+                <IndianRupee className="w-8 h-8 text-green-300" />
               </div>
             </CardContent>
           </Card>
           
           <Card className="border-neutral-200" data-testid="total-orders-card">
-            <CardHeader>
+            <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-neutral-600">Total Orders</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold" data-testid="total-orders-count">{orders.length}</div>
+                <div className="text-2xl md:text-3xl font-bold" data-testid="total-orders-count">
+                  {analytics?.orders?.total || orders.length}
+                </div>
                 <ShoppingBag className="w-8 h-8 text-neutral-300" />
               </div>
+              <p className="text-xs text-neutral-500 mt-1">
+                {analytics?.orders?.pending || 0} pending
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-neutral-200" data-testid="total-users-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-neutral-600">Total Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl md:text-3xl font-bold" data-testid="total-users-count">
+                  {analytics?.users?.total || users.length}
+                </div>
+                <Users className="w-8 h-8 text-neutral-300" />
+              </div>
+              <p className="text-xs text-neutral-500 mt-1">
+                {analytics?.users?.sellers || sellers.length} sellers
+              </p>
             </CardContent>
           </Card>
           
-          <Card className="border-neutral-200" data-testid="pending-approvals-card">
-            <CardHeader>
+          <Card className="border-neutral-200 bg-gradient-to-br from-orange-50 to-white" data-testid="pending-approvals-card">
+            <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-neutral-600">Pending Approvals</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold" data-testid="pending-count">{pendingProducts.length}</div>
-                <CheckCircle className="w-8 h-8 text-neutral-300" />
+                <div className="text-2xl md:text-3xl font-bold text-orange-600" data-testid="pending-count">
+                  {analytics?.products?.pending_approval || pendingProducts.length}
+                </div>
+                <CheckCircle className="w-8 h-8 text-orange-300" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList>
+        <Tabs defaultValue="analytics" className="space-y-6">
+          <TabsList className="flex-wrap">
+            <TabsTrigger value="analytics" data-testid="analytics-tab">
+              <BarChart3 className="w-4 h-4 mr-2" />Analytics
+            </TabsTrigger>
             <TabsTrigger value="orders" data-testid="orders-tab">Orders</TabsTrigger>
-            <TabsTrigger value="products" data-testid="products-tab">Product Approvals</TabsTrigger>
+            <TabsTrigger value="products" data-testid="products-tab">Approvals</TabsTrigger>
             <TabsTrigger value="all-products" data-testid="all-products-tab">All Products</TabsTrigger>
             <TabsTrigger value="users" data-testid="users-tab">Users</TabsTrigger>
           </TabsList>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" data-testid="analytics-section">
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Top Selling Products */}
+              <Card className="border-neutral-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    Top Selling Products
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analytics?.products?.top_selling?.length > 0 ? (
+                    <div className="space-y-3">
+                      {analytics.products.top_selling.map((product, idx) => (
+                        <div key={product.product_id || idx} className="flex justify-between items-center p-3 bg-neutral-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <span className="w-6 h-6 bg-[#FF4D00] text-white text-sm rounded-full flex items-center justify-center">
+                              {idx + 1}
+                            </span>
+                            <div>
+                              <p className="font-medium text-sm">{product.name || 'Unknown Product'}</p>
+                              <p className="text-xs text-neutral-500">{product.orders} orders</p>
+                            </div>
+                          </div>
+                          <span className="font-mono font-bold text-green-600">₹{product.revenue?.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center py-8 text-neutral-500">No sales data yet</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Top Rated Products */}
+              <Card className="border-neutral-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-500" />
+                    Top Rated Products
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analytics?.products?.top_rated?.length > 0 ? (
+                    <div className="space-y-3">
+                      {analytics.products.top_rated.map((product, idx) => (
+                        <div key={product.id || idx} className="flex justify-between items-center p-3 bg-neutral-50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-sm">{product.name}</p>
+                            <p className="text-xs text-neutral-500">{product.review_count} reviews</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            <span className="font-bold">{product.avg_rating}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center py-8 text-neutral-500">No reviews yet</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Revenue by Material */}
+              <Card className="border-neutral-200">
+                <CardHeader>
+                  <CardTitle>Revenue by Material</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analytics?.revenue?.by_material?.length > 0 ? (
+                    <div className="space-y-3">
+                      {analytics.revenue.by_material.map((item, idx) => (
+                        <div key={item.material || idx} className="flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <span className={`w-3 h-3 rounded-full ${
+                              item.material === 'PLA' ? 'bg-blue-500' : 
+                              item.material === 'ABS' ? 'bg-purple-500' : 'bg-amber-500'
+                            }`}></span>
+                            <span className="font-medium">{item.material || 'Unknown'}</span>
+                            <span className="text-xs text-neutral-500">({item.orders} orders)</span>
+                          </div>
+                          <span className="font-mono font-bold">₹{item.revenue?.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center py-8 text-neutral-500">No data yet</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Order Status Breakdown */}
+              <Card className="border-neutral-200">
+                <CardHeader>
+                  <CardTitle>Order Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analytics?.orders?.status_breakdown?.length > 0 ? (
+                    <div className="space-y-3">
+                      {analytics.orders.status_breakdown.map((item, idx) => (
+                        <div key={item.status || idx} className="flex justify-between items-center">
+                          <span className={`px-2 py-1 text-xs rounded ${
+                            item.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                            item.status === 'Shipped' ? 'bg-blue-100 text-blue-800' :
+                            item.status === 'Printing' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-neutral-100 text-neutral-800'
+                          }`}>
+                            {item.status}
+                          </span>
+                          <span className="font-bold">{item.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center py-8 text-neutral-500">No orders yet</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           <TabsContent value="orders" data-testid="orders-section">
             <Card className="border-neutral-200">
@@ -229,9 +373,9 @@ const AdminDashboardPage = () => {
                         <div className="flex gap-4">
                           <div className="w-20 h-20 bg-neutral-100 rounded-md flex-shrink-0">
                             {product.images && product.images.length > 0 ? (
-                              <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                              <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover rounded-md" />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-neutral-400">No Image</div>
+                              <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs">No Image</div>
                             )}
                           </div>
                           <div className="flex-1">
@@ -239,7 +383,7 @@ const AdminDashboardPage = () => {
                             <p className="text-sm text-neutral-600" data-testid="product-details">
                               {product.category} • {product.material} • {product.volume_cm3} cm³
                             </p>
-                            <p className="text-sm text-neutral-600 mt-2" data-testid="product-description">{product.description}</p>
+                            <p className="text-sm text-neutral-600 mt-2 line-clamp-2" data-testid="product-description">{product.description}</p>
                           </div>
                           <div className="flex flex-col gap-2">
                             <div className="font-mono font-bold text-[#FF4D00]" data-testid="product-price">₹{product.final_price}</div>
@@ -266,7 +410,7 @@ const AdminDashboardPage = () => {
                               onClick={() => openDeleteDialog(product)}
                               data-testid={`delete-btn-${product.id}`}
                             >
-                              <XCircle className="w-4 h-4 mr-2" /> Delete
+                              Delete
                             </Button>
                           </div>
                         </div>
@@ -281,7 +425,7 @@ const AdminDashboardPage = () => {
           <TabsContent value="all-products" data-testid="all-products-section">
             <Card className="border-neutral-200">
               <CardHeader>
-                <CardTitle>All Products</CardTitle>
+                <CardTitle>All Products ({allProducts.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 {allProducts.length === 0 ? (
@@ -295,7 +439,7 @@ const AdminDashboardPage = () => {
                             {product.images && product.images.length > 0 ? (
                               <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover rounded-md" />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-neutral-400">No Image</div>
+                              <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs">No Image</div>
                             )}
                           </div>
                           <div className="flex-1">
@@ -303,14 +447,18 @@ const AdminDashboardPage = () => {
                             <p className="text-sm text-neutral-600" data-testid="product-details">
                               {product.category} • {product.material} • {product.volume_cm3} cm³
                             </p>
-                            <p className="text-sm text-neutral-600 mt-2" data-testid="product-description">{product.description}</p>
-                            <div className="flex gap-2 mt-2">
+                            <div className="flex gap-2 mt-2 flex-wrap">
                               <span className={`px-2 py-1 text-xs rounded ${product.is_published ? 'bg-green-100 text-green-800' : 'bg-neutral-100'}`}>
                                 {product.is_published ? 'Published' : 'Draft'}
                               </span>
                               <span className={`px-2 py-1 text-xs rounded ${product.is_approved ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                 {product.is_approved ? 'Approved' : 'Pending'}
                               </span>
+                              {product.avg_rating > 0 && (
+                                <span className="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800 flex items-center gap-1">
+                                  <Star className="w-3 h-3 fill-current" /> {product.avg_rating}
+                                </span>
+                              )}
                             </div>
                           </div>
                           <div className="flex flex-col gap-2 items-end">
@@ -337,7 +485,7 @@ const AdminDashboardPage = () => {
           <TabsContent value="users" data-testid="users-section">
             <Card className="border-neutral-200">
               <CardHeader>
-                <CardTitle>All Users</CardTitle>
+                <CardTitle>All Users ({users.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 {users.length === 0 ? (
@@ -350,7 +498,11 @@ const AdminDashboardPage = () => {
                           <h4 className="font-bold" data-testid="user-name">{user.name}</h4>
                           <p className="text-sm text-neutral-600" data-testid="user-email">{user.email}</p>
                         </div>
-                        <span className="px-3 py-1 bg-neutral-100 text-sm rounded" data-testid="user-role">
+                        <span className={`px-3 py-1 text-sm rounded ${
+                          user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                          user.role === 'seller' ? 'bg-blue-100 text-blue-800' :
+                          'bg-neutral-100'
+                        }`} data-testid="user-role">
                           {user.role}
                         </span>
                       </div>
