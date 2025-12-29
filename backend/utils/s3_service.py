@@ -6,24 +6,32 @@ from typing import Optional
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Setup logging first
+# Load environment variables FIRST before anything else
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(env_path, override=True)
+
+# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load environment variables from the backend .env file
-env_path = Path(__file__).resolve().parent.parent / '.env'
-logger.info(f"Loading .env from: {env_path}")
-load_dotenv(env_path, override=True)
-
-# Debug: print loaded values
-logger.info(f"AWS_ACCESS_KEY_ID loaded: {os.getenv('AWS_ACCESS_KEY_ID', 'NOT SET')[:10] if os.getenv('AWS_ACCESS_KEY_ID') else 'NOT SET'}...")
-logger.info(f"S3_BUCKET_NAME: {os.getenv('S3_BUCKET_NAME', 'NOT SET')}")
-
 class S3Service:
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
     def __init__(self):
+        if S3Service._initialized:
+            return
+        
         # Check if we have valid AWS credentials
         aws_key = os.getenv('AWS_ACCESS_KEY_ID')
         aws_secret = os.getenv('AWS_SECRET_ACCESS_KEY')
+        
+        logger.info(f"S3Service init - AWS_ACCESS_KEY_ID: {aws_key[:10] if aws_key else 'NOT SET'}...")
         
         if not aws_key or aws_key == 'your_aws_access_key_here' or not aws_secret or aws_secret == 'your_aws_secret_key_here':
             logger.warning("No valid AWS credentials found - S3 uploads will fail")
@@ -40,7 +48,9 @@ class S3Service:
                 aws_secret_access_key=aws_secret,
                 region_name=self.region
             )
-            logger.info(f"AWS S3 Service initialized - Bucket: {self.bucket_name}, Region: {self.region}")
+            logger.info(f"✅ AWS S3 Service initialized - Bucket: {self.bucket_name}, Region: {self.region}")
+        
+        S3Service._initialized = True
     
     def get_public_url(self, file_key: str) -> str:
         """Generate a public URL for an S3 object"""
@@ -130,4 +140,5 @@ class S3Service:
             logger.error(f"Error deleting file: {e}")
             return False
 
+# Create singleton instance
 s3_service = S3Service()
