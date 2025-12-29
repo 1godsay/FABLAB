@@ -363,6 +363,69 @@ async def upload_product_image(
     
     return {"message": "Image uploaded", "image_url": image_url}
 
+@api_router.put("/products/{product_id}/set-primary-image")
+async def set_primary_image(
+    product_id: str,
+    image_index: int = Form(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Set a specific image as the primary (first) image"""
+    product = await db.products.find_one({"id": product_id, "seller_id": current_user["id"]})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    images = product.get("images", [])
+    if image_index < 0 or image_index >= len(images):
+        raise HTTPException(status_code=400, detail="Invalid image index")
+    
+    # Move the selected image to the front
+    selected_image = images.pop(image_index)
+    images.insert(0, selected_image)
+    
+    await db.products.update_one(
+        {"id": product_id},
+        {"$set": {"images": images}}
+    )
+    
+    return {"message": "Primary image updated", "images": images}
+
+@api_router.delete("/products/{product_id}/delete-image/{image_index}")
+async def delete_product_image(
+    product_id: str,
+    image_index: int,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a specific image from a product"""
+    product = await db.products.find_one({"id": product_id, "seller_id": current_user["id"]})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    images = product.get("images", [])
+    if image_index < 0 or image_index >= len(images):
+        raise HTTPException(status_code=400, detail="Invalid image index")
+    
+    # Get the image URL to delete from S3
+    image_url = images[image_index]
+    
+    # Try to delete from S3 if it's an S3 URL
+    if "s3." in image_url and "amazonaws.com" in image_url:
+        # Extract the file key from the S3 URL
+        try:
+            file_key = image_url.split(".amazonaws.com/")[1]
+            s3_service.delete_file(file_key)
+        except Exception as e:
+            logger.warning(f"Failed to delete image from S3: {e}")
+    
+    # Remove from the images array
+    images.pop(image_index)
+    
+    await db.products.update_one(
+        {"id": product_id},
+        {"$set": {"images": images}}
+    )
+    
+    return {"message": "Image deleted", "images": images}
+
 @api_router.put("/products/{product_id}/update-volume")
 async def update_product_volume(
     product_id: str,
