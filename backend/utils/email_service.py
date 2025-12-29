@@ -89,7 +89,7 @@ class EmailService:
                         <p><strong>Status:</strong> <span class="status">{order_details['status']}</span></p>
                     </div>
                     
-                    <p>You can track your order status in your <a href="{os.getenv('FRONTEND_URL', 'https://fablab.com')}/orders">Orders Page</a>.</p>
+                    <p>You can track your order status in your <a href="{os.getenv('FRONTEND_URL', '')}/orders">Orders Page</a>.</p>
                     
                     <p>If you have any questions, feel free to reach out to us.</p>
                     
