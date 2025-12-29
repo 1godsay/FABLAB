@@ -1180,6 +1180,11 @@ async def serve_mock_file(file_path: str):
 
 app.include_router(api_router)
 
+# Root-level health check for Kubernetes (without /api prefix)
+@app.get("/health")
+async def root_health_check():
+    return {"status": "healthy", "service": "FABLAB API"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
