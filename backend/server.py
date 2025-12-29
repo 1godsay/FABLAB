@@ -762,6 +762,8 @@ async def get_pending_products(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     products = await db.products.find({"is_approved": False}, {"_id": 0}).to_list(1000)
+    for product in products:
+        fix_image_urls(product)
     return {"products": products}
 
 @api_router.get("/admin/products/all")
@@ -771,6 +773,8 @@ async def get_all_products_admin(current_user: dict = Depends(get_current_user))
         raise HTTPException(status_code=403, detail="Admin access required")
     
     products = await db.products.find({}, {"_id": 0}).to_list(1000)
+    for product in products:
+        fix_image_urls(product)
     return {"products": products}
 
 @api_router.put("/admin/products/{product_id}/approve")
