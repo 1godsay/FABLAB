@@ -167,19 +167,29 @@ const ProductDetailPage = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
-            <div className="aspect-square bg-neutral-100 rounded-md border border-neutral-200 overflow-hidden relative" data-testid="product-image-container">
+            <div 
+              className="aspect-square bg-neutral-100 rounded-md border border-neutral-200 overflow-hidden relative cursor-zoom-in group" 
+              data-testid="product-image-container"
+              onClick={() => product.images && product.images.length > 0 && setLightboxOpen(true)}
+            >
               {product.images && product.images.length > 0 ? (
                 <>
                   <img
                     src={product.images[currentImageIndex]}
                     alt={`${product.name} - Image ${currentImageIndex + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
                     data-testid="product-main-image"
                   />
+                  {/* Zoom hint */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3 shadow-lg">
+                      <ZoomIn className="w-6 h-6 text-neutral-700" />
+                    </div>
+                  </div>
                   {product.images.length > 1 && (
                     <>
                       <button
-                        onClick={prevImage}
+                        onClick={(e) => { e.stopPropagation(); prevImage(); }}
                         className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all"
                         data-testid="prev-image-btn"
                         aria-label="Previous image"
