@@ -838,7 +838,7 @@ async def health_check():
 @api_router.get("/files/mock/{file_path:path}")
 async def serve_mock_file(file_path: str):
     """Serve mock S3 files for testing"""
-    from fastapi.responses import Response
+    from fastapi.responses import Response, RedirectResponse
     
     if hasattr(s3_service, 'use_mock') and s3_service.use_mock:
         file_content = s3_service.mock_service.get_file(file_path)
@@ -855,6 +855,10 @@ async def serve_mock_file(file_path: str):
                 content_type = 'application/vnd.ms-pki.stl'
             
             return Response(content=file_content, media_type=content_type)
+    
+    # For missing image files, redirect to a placeholder
+    if file_path.startswith('images/'):
+        return RedirectResponse(url="https://placehold.co/400x400/f5f5f5/666666?text=Image+Not+Available", status_code=302)
     
     raise HTTPException(status_code=404, detail="File not found")
 
