@@ -1065,11 +1065,16 @@ async def get_admin_analytics(current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    # Total revenue from completed orders
-    orders = await db.orders.find({}).to_list(10000)
-    total_revenue = sum(o.get("total_amount", 0) for o in orders if o.get("status") in ["Delivered", "Shipped", "Order placed", "Printing"])
-    completed_orders = len([o for o in orders if o.get("status") == "Delivered"])
-    pending_orders = len([o for o in orders if o.get("status") in ["Order placed", "Printing", "Shipped"]])
+    # Total revenue from completed orders - use aggregation for efficiency
+    revenue_pipeline = [
+        {"$match": {"status": {"$in": ["Delivered", "Shipped", "Order placed", "Printing"]}}},
+        {"$group": {"_id": None, "total": {"$sum": "$total_amount"}, "count": {"$sum": 1}}}
+    ]
+    revenue_result = await db.orders.aggregate(revenue_pipeline).to_list(1)
+    total_revenue = revenue_result[0]["total"] if revenue_result else 0
+    
+    completed_orders = await db.orders.count_documents({"status": "Delivered"})
+    pending_orders = await db.orders.count_documents({"status": {"$in": ["Order placed", "Printing", "Shipped"]}})
     
     # User stats
     total_users = await db.users.count_documents({})
