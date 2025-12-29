@@ -553,9 +553,9 @@ const SellerDashboardPage = () => {
       </Dialog>
 
       <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
-        <DialogContent className="max-w-md" data-testid="image-upload-dialog">
+        <DialogContent className="max-w-lg" data-testid="image-upload-dialog">
           <DialogHeader>
-            <DialogTitle>Add Product Images</DialogTitle>
+            <DialogTitle>Manage Product Images</DialogTitle>
           </DialogHeader>
           {selectedProduct && (
             <div className="space-y-4">
@@ -564,20 +564,74 @@ const SellerDashboardPage = () => {
                 {selectedProduct.images && selectedProduct.images.length > 0 && (
                   <div className="mb-4">
                     <p className="text-sm font-medium mb-2">Current Images ({selectedProduct.images.length}):</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <p className="text-xs text-neutral-500 mb-2">First image is the primary image shown in marketplace</p>
+                    <div className="grid grid-cols-2 gap-3">
                       {selectedProduct.images.map((img, idx) => (
-                        <img
-                          key={idx}
-                          src={img}
-                          alt={`Product ${idx + 1}`}
-                          className="w-full h-24 object-cover rounded border border-neutral-200"
-                        />
+                        <div key={idx} className={`relative group rounded border-2 ${idx === 0 ? 'border-[#FF4D00]' : 'border-neutral-200'}`}>
+                          <img
+                            src={img}
+                            alt={`Product ${idx + 1}`}
+                            className="w-full h-28 object-cover rounded"
+                          />
+                          {idx === 0 && (
+                            <span className="absolute top-1 left-1 bg-[#FF4D00] text-white text-xs px-2 py-0.5 rounded">Primary</span>
+                          )}
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded">
+                            {idx !== 0 && (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="text-xs"
+                                onClick={async () => {
+                                  try {
+                                    const formData = new FormData();
+                                    formData.append('image_index', idx);
+                                    await api.put(`/products/${selectedProduct.id}/set-primary-image`, formData);
+                                    toast.success('Primary image updated!');
+                                    fetchProducts();
+                                    // Update selected product
+                                    const newImages = [...selectedProduct.images];
+                                    const [moved] = newImages.splice(idx, 1);
+                                    newImages.unshift(moved);
+                                    setSelectedProduct({...selectedProduct, images: newImages});
+                                  } catch (error) {
+                                    toast.error('Failed to set primary image');
+                                  }
+                                }}
+                                data-testid={`set-primary-${idx}`}
+                              >
+                                Set Primary
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="text-xs"
+                              onClick={async () => {
+                                if (!window.confirm('Delete this image?')) return;
+                                try {
+                                  await api.delete(`/products/${selectedProduct.id}/delete-image/${idx}`);
+                                  toast.success('Image deleted!');
+                                  fetchProducts();
+                                  // Update selected product
+                                  const newImages = selectedProduct.images.filter((_, i) => i !== idx);
+                                  setSelectedProduct({...selectedProduct, images: newImages});
+                                } catch (error) {
+                                  toast.error('Failed to delete image');
+                                }
+                              }}
+                              data-testid={`delete-image-${idx}`}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
-              <form onSubmit={handleImageUpload} className="space-y-4">
+              <form onSubmit={handleImageUpload} className="space-y-4 border-t pt-4">
                 <div>
                   <Label htmlFor="product-image">Upload New Image</Label>
                   <Input
@@ -600,7 +654,7 @@ const SellerDashboardPage = () => {
                     className="flex-1"
                     data-testid="cancel-image-btn"
                   >
-                    Cancel
+                    Done
                   </Button>
                   <Button
                     type="submit"
