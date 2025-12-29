@@ -161,6 +161,13 @@ const MarketplacePage = () => {
                     <span className="px-2 py-1 text-xs bg-neutral-100 rounded" data-testid="product-material">{product.material}</span>
                   </div>
                   <p className="text-sm text-neutral-600 mb-4 line-clamp-2" data-testid="product-description">{product.description}</p>
+                  {product.avg_rating > 0 && (
+                    <div className="flex items-center gap-1 mb-3" data-testid="product-rating">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-bold text-sm">{product.avg_rating.toFixed(1)}</span>
+                      <span className="text-xs text-neutral-500">({product.review_count})</span>
+                    </div>
+                  )}
                   <div className="flex items-end justify-between">
                     <div>
                       <div className="text-xs text-neutral-500" data-testid="product-volume">{product.volume_cm3} cm³</div>
