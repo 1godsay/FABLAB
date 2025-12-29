@@ -15,9 +15,30 @@ import razorpay
 from utils.auth import hash_password, verify_password, create_access_token, decode_token
 from utils.s3_service import s3_service
 from utils.stl_parser import calculate_stl_volume, calculate_price
+import re
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+def fix_image_urls(product: dict) -> dict:
+    """Fix image URLs to use current BACKEND_URL"""
+    if "images" in product and product["images"]:
+        backend_url = os.getenv('BACKEND_URL', '')
+        fixed_images = []
+        for img_url in product["images"]:
+            # Extract the file path from any URL format
+            if "/api/files/mock/" in img_url:
+                # Extract path after /api/files/mock/
+                match = re.search(r'/api/files/mock/(.+)$', img_url)
+                if match:
+                    file_path = match.group(1)
+                    fixed_images.append(f"{backend_url}/api/files/mock/{file_path}")
+                else:
+                    fixed_images.append(img_url)
+            else:
+                fixed_images.append(img_url)
+        product["images"] = fixed_images
+    return product
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
