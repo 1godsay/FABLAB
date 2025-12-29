@@ -3,6 +3,12 @@ from botocore.exceptions import ClientError
 import os
 import logging
 from typing import Optional
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+ROOT_DIR = Path(__file__).parent.parent
+load_dotenv(ROOT_DIR / '.env')
 
 logger = logging.getLogger(__name__)
 
