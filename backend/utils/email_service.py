@@ -164,7 +164,7 @@ class EmailService:
                     <p><strong>Order ID:</strong> {order_details['order_id']}</p>
                     <p><strong>Product:</strong> {order_details['product_name']}</p>
                     
-                    <p>Track your order: <a href="{os.getenv('FRONTEND_URL', 'https://fablab.com')}/orders">View Orders</a></p>
+                    <p>Track your order: <a href="{os.getenv('FRONTEND_URL', '')}/orders">View Orders</a></p>
                     
                     <p>Best regards,<br>The FABLAB Team</p>
                 </div>
