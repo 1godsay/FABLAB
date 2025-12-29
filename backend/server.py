@@ -751,13 +751,49 @@ async def verify_payment(
         
         await db.orders.update_many(
             {"razorpay_order_id": razorpay_order_id},
-            {"$set": {"razorpay_payment_id": razorpay_payment_id, "status": "Printing"}}
+            {"$set": {"razorpay_payment_id": razorpay_payment_id, "status": "Order placed"}}
         )
         
         await db.transactions.update_one(
             {"razorpay_order_id": razorpay_order_id},
             {"$set": {"razorpay_payment_id": razorpay_payment_id, "status": "completed"}}
         )
+        
+        # Send order confirmation emails
+        orders = await db.orders.find({"razorpay_order_id": razorpay_order_id}, {"_id": 0}).to_list(100)
+        for order in orders:
+            # Send confirmation to buyer
+            try:
+                email_service.send_order_confirmation(
+                    buyer_email=current_user["email"],
+                    buyer_name=current_user["name"],
+                    order_details={
+                        "order_id": order["id"],
+                        "product_name": order["product_name"],
+                        "quantity": order["quantity"],
+                        "total_amount": order["total_amount"],
+                        "status": "Order placed"
+                    }
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send order confirmation email: {e}")
+            
+            # Send notification to seller
+            try:
+                seller = await db.users.find_one({"id": order["seller_id"]}, {"_id": 0})
+                if seller:
+                    email_service.send_new_order_notification_to_seller(
+                        seller_email=seller["email"],
+                        seller_name=seller["name"],
+                        order_details={
+                            "order_id": order["id"],
+                            "product_name": order["product_name"],
+                            "quantity": order["quantity"],
+                            "total_amount": order["total_amount"]
+                        }
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to send seller notification email: {e}")
         
         return {"message": "Payment verified successfully"}
     except Exception as e:
