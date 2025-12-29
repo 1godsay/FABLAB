@@ -3,9 +3,10 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowLeft, Box, Layers, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Box, Layers, ChevronLeft, ChevronRight, Star, User } from 'lucide-react';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -14,9 +15,15 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [reviews, setReviews] = useState([]);
+  const [avgRating, setAvgRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     fetchProduct();
+    fetchReviews();
   }, [id]);
 
   const fetchProduct = async () => {
@@ -30,8 +37,48 @@ const ProductDetailPage = () => {
     }
   };
 
+  const fetchReviews = async () => {
+    try {
+      const response = await api.get(`/products/${id}/reviews`);
+      setReviews(response.data.reviews || []);
+      setAvgRating(response.data.avg_rating || 0);
+      setReviewCount(response.data.review_count || 0);
+    } catch (error) {
+      console.error('Failed to load reviews');
+    }
+  };
+
+  const submitReview = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error('Please login to submit a review');
+      navigate('/auth');
+      return;
+    }
+
+    if (!newReview.comment.trim()) {
+      toast.error('Please write a comment');
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      await api.post('/reviews', {
+        product_id: id,
+        rating: newReview.rating,
+        comment: newReview.comment
+      });
+      toast.success('Review submitted successfully!');
+      setNewReview({ rating: 5, comment: '' });
+      fetchReviews();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   const addToCart = () => {
-    // Check if user is logged in
     if (!user) {
       toast.error('Please login to add items to cart');
       navigate('/auth');
@@ -65,6 +112,26 @@ const ProductDetailPage = () => {
 
   const selectImage = (index) => {
     setCurrentImageIndex(index);
+  };
+
+  const renderStars = (rating, interactive = false, onSelect = null) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type={interactive ? 'button' : undefined}
+            onClick={interactive ? () => onSelect(star) : undefined}
+            className={`${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : 'cursor-default'}`}
+            disabled={!interactive}
+          >
+            <Star 
+              className={`w-5 h-5 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-neutral-300'}`}
+            />
+          </button>
+        ))}
+      </div>
+    );
   };
 
   if (loading) {
@@ -178,6 +245,16 @@ const ProductDetailPage = () => {
             <div>
               <span className="text-xs uppercase tracking-widest text-neutral-500" data-testid="product-category">{product.category}</span>
               <h1 className="text-4xl font-bold tracking-tight mt-2" data-testid="product-name">{product.name}</h1>
+              
+              {/* Rating Display */}
+              {reviewCount > 0 && (
+                <div className="flex items-center gap-2 mt-3" data-testid="product-rating">
+                  {renderStars(Math.round(avgRating))}
+                  <span className="font-bold">{avgRating.toFixed(1)}</span>
+                  <span className="text-neutral-500">({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</span>
+                </div>
+              )}
+              
               <p className="text-neutral-600 mt-4 leading-relaxed" data-testid="product-description">{product.description}</p>
             </div>
 
@@ -233,6 +310,107 @@ const ProductDetailPage = () => {
                   <Layers className="w-4 h-4 mr-2" /> Download STL Preview
                 </Button>
               </a>
+            )}
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-16" data-testid="reviews-section">
+          <h2 className="text-2xl font-bold tracking-tight mb-6">Customer Reviews</h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Review Summary */}
+            <Card className="border-neutral-200 md:col-span-1">
+              <CardContent className="p-6 text-center">
+                <div className="text-5xl font-bold text-[#FF4D00]" data-testid="avg-rating-display">
+                  {avgRating > 0 ? avgRating.toFixed(1) : '-'}
+                </div>
+                <div className="flex justify-center mt-2">
+                  {renderStars(Math.round(avgRating))}
+                </div>
+                <p className="text-neutral-500 mt-2" data-testid="review-count-display">
+                  {reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Write Review Form */}
+            <Card className="border-neutral-200 md:col-span-2">
+              <CardHeader>
+                <CardTitle>Write a Review</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {user ? (
+                  <form onSubmit={submitReview} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Your Rating</label>
+                      <div data-testid="rating-selector">
+                        {renderStars(newReview.rating, true, (rating) => setNewReview({...newReview, rating}))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Your Review</label>
+                      <Textarea
+                        placeholder="Share your experience with this product..."
+                        value={newReview.comment}
+                        onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
+                        rows={4}
+                        data-testid="review-comment-input"
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="btn-primary" 
+                      disabled={submittingReview}
+                      data-testid="submit-review-btn"
+                    >
+                      {submittingReview ? 'Submitting...' : 'Submit Review'}
+                    </Button>
+                  </form>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-neutral-600 mb-4">Please login to write a review</p>
+                    <Link to="/auth">
+                      <Button variant="outline" data-testid="login-to-review-btn">Login to Review</Button>
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Reviews List */}
+          <div className="mt-8 space-y-4" data-testid="reviews-list">
+            {reviews.length === 0 ? (
+              <p className="text-center py-8 text-neutral-500" data-testid="no-reviews-message">
+                No reviews yet. Be the first to review this product!
+              </p>
+            ) : (
+              reviews.map((review) => (
+                <Card key={review.id} className="border-neutral-200" data-testid={`review-${review.id}`}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 text-neutral-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold" data-testid="review-author">{review.buyer_name}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              {renderStars(review.rating)}
+                              <span className="text-xs text-neutral-500" data-testid="review-date">
+                                {new Date(review.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="mt-3 text-neutral-700" data-testid="review-comment">{review.comment}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
             )}
           </div>
         </div>
