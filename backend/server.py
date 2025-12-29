@@ -860,13 +860,35 @@ async def update_order_status(
     if status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
     
+    # Get order before update
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    old_status = order.get("status")
+    
     result = await db.orders.update_one(
         {"id": order_id},
         {"$set": {"status": status}}
     )
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Order not found")
+    # Send email notification if status changed
+    if old_status != status:
+        try:
+            buyer = await db.users.find_one({"id": order["buyer_id"]}, {"_id": 0})
+            if buyer:
+                email_service.send_order_status_update(
+                    buyer_email=buyer["email"],
+                    buyer_name=buyer["name"],
+                    order_details={
+                        "order_id": order["id"],
+                        "product_name": order["product_name"]
+                    },
+                    new_status=status
+                )
+                logger.info(f"Status update email sent to {buyer['email']} for order {order_id}")
+        except Exception as e:
+            logger.warning(f"Failed to send status update email: {e}")
     
     return {"message": "Order status updated", "status": status}
 
