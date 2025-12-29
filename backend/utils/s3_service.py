@@ -6,9 +6,9 @@ from typing import Optional
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
-ROOT_DIR = Path(__file__).parent.parent
-load_dotenv(ROOT_DIR / '.env')
+# Load environment variables from the backend .env file
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(env_path)
 
 logger = logging.getLogger(__name__)
 
