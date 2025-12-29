@@ -307,9 +307,9 @@ async def upload_stl(
         raise HTTPException(status_code=400, detail=str(e))
     
     file_key = f"stl/{uuid.uuid4()}.stl"
-    success = s3_service.upload_file(stl_content, file_key, 'application/vnd.ms-pki.stl')
+    stl_url = s3_service.upload_file(stl_content, file_key, 'application/vnd.ms-pki.stl')
     
-    if not success:
+    if not stl_url:
         raise HTTPException(status_code=500, detail="Failed to upload STL file")
     
     product_dict = {
@@ -350,18 +350,17 @@ async def upload_product_image(
     image_content = await image.read()
     file_key = f"images/{uuid.uuid4()}.{image.filename.split('.')[-1]}"
     
-    success = s3_service.upload_file(image_content, file_key, image.content_type)
-    if not success:
+    # upload_file now returns the public URL for images
+    image_url = s3_service.upload_file(image_content, file_key, image.content_type)
+    if not image_url:
         raise HTTPException(status_code=500, detail="Failed to upload image")
-    
-    download_url = s3_service.generate_download_url(file_key)
     
     await db.products.update_one(
         {"id": product_id},
-        {"$push": {"images": download_url}}
+        {"$push": {"images": image_url}}
     )
     
-    return {"message": "Image uploaded", "image_url": download_url}
+    return {"message": "Image uploaded", "image_url": image_url}
 
 @api_router.put("/products/{product_id}/update-volume")
 async def update_product_volume(
